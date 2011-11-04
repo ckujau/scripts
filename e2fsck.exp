@@ -1,0 +1,17 @@
+#!/usr/bin/expect -f
+#
+# (c) 2009, lists@nerdbynature.de
+# Run e2fsck via expect, see http://nerdbynature.de/s9y/?128
+#
+set timeout -1
+spawn /sbin/e2fsck -v $argv
+expect {
+	"Clear<y>? "	{ send "y" ; exp_continue }
+	"Abort<y>? "	{ send "n" ; exp_continue }
+	"Recreate<y>? "	{ send "y" ; exp_continue }
+	"Fix<y>? "	{ send "y" ; exp_continue }
+	"Ignore error<y>? "	{ send "y" ; exp_continue }
+	"Force rewrite<y>? "	{ send "y" ; exp_continue }
+	"Root inode not allocated.  Allocate<y>?"	{ send "y" ; exp_continue }
+	"/lost+found not found.  Create<y>?"		{ send "y" ; exp_continue }
+}
