@@ -1,9 +1,9 @@
 <?php
 /*
-$ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : $_SERVER['HTTP_X_FORWARDED_FOR'];
-$host = gethostbyaddr($ip);
-$ua = $_SERVER['HTTP_USER_AGENT'];
-*/
+ * (c)2009 lists@nerdbynature.de
+ * Display REMOTE_ADDR, HTTP_X_FORWARDED_FOR, HTTP_USER_AGENT of the client
+ *
+ */
 $ip1 = $_SERVER['REMOTE_ADDR'];
 $ip2 = $_SERVER['HTTP_X_FORWARDED_FOR'];
 $host1 = isset($ip1) ? gethostbyaddr($ip1) : "";
@@ -24,4 +24,10 @@ echo "<?xml version=\"1.0\"?>
 <tr><td>HTTP_X_FORWARDED_FOR</td><td>$ip2 ($host2)</td></tr>
 <tr><td>HTTP_USER_AGENT</td><td>$ua</td></tr>
 </table></body></html>\n";
+
+/* TODO: implement plain-text output
+$ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : $_SERVER['HTTP_X_FORWARDED_FOR'];
+$host = gethostbyaddr($ip);
+$ua = $_SERVER['HTTP_USER_AGENT'];
+ */
 ?>
