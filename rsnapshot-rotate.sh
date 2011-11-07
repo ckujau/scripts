@@ -1,7 +1,6 @@
 #!/bin/sh
 #
 # (c)2011 lists@nerdbynature.de
-#
 # Forcefully rotate rsnapshot backups, intentionally discard older copies
 #
 if [ ! $# = 1 ]; then

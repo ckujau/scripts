@@ -1,7 +1,6 @@
 #!/bin/sh
 #
 # (c) 2009 lists@nerdbynature.de
-#
 # Rsnapshot wrapper script
 #
 LANG=C

@@ -1,10 +1,8 @@
 #!/bin/sh
 #
 # (c)2010, lists@nerdbynature.de
-#
-# Install a new kernel, but not via the usual "make install" routine.
-# -native: install .config, image, modules to /boot
-# -xen: transfer .config, image to Dom0, install modules locally
+# Install a new kernel, System.map and .config,
+# but not via the usual "make install" routine
 #
 umask 0022
 
@@ -17,7 +15,8 @@ if [ ! `id -u` = 0 ]; then
 fi
 
 usage() {
-echo "Usage: `basename $0` [dest] [builddir]"
+echo "Usage: `basename $0` directory builddir"
+echo "                   [user@]host:directory builddir"
 exit 1
 }
 

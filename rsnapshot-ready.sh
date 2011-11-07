@@ -1,9 +1,8 @@
 #!/bin/sh
 #
 # (c)2009 lists@nerdbynature.de
-#
 # Check for certain directories to be in place. If they are,
-# /create a file which says that we're ready to be backed up.
+# create a file which says that we're ready to be backed up.
 #
 PATH=/bin:/usr/bin:/usr/sbin
 FILE=/var/run/rsnapshot.ready
