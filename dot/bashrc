@@ -9,9 +9,8 @@ else
 	alias la='ls -lh'
 fi
 
-shopt -s histappend
-history -n
 export PROMPT_COMMAND='history -a'
+export TERM=xterm-color
 export HISTTIMEFORMAT='%F %T '
 export HISTSIZE=10000
 export HISTCONTROL=ignoredups
