@@ -1,5 +1,5 @@
 "
-" .vimrc
+" ~/.vimrc
 "
 syntax on		" May not be supported
 set background=dark	" Use 'light' otherwise

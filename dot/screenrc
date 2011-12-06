@@ -8,6 +8,4 @@ activity	"activity in %n (%t) [%w:%s]~"
 bell_msg	"message in %n (%t) [%w:%s]~"
 hardstatus	alwayslastline "%{= kY} %H | %Y-%m-%d %c:%s | Load: %l | %w"
 term		xterm
-screen -t a
-screen -t b
-screen -t c
+source		${HOME}/.screenrc.local
