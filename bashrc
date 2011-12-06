@@ -16,7 +16,8 @@ export HISTTIMEFORMAT='%F %T '
 export HISTSIZE=10000
 export HISTCONTROL=ignoredups
 export GREP_OPTIONS='--color=tty --devices=skip'
-export PAGER='less --IGNORE-CASE --squeeze-blank-lines --no-init'
+export PAGER='less'
+export LESS='--ignore-case --squeeze-blank-lines --no-init'
 export EDITOR=vi
 
 alias mv='mv -iv'
