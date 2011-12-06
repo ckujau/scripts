@@ -10,7 +10,8 @@ else
 fi
 
 shopt -s histappend
-export PROMPT_COMMAND='history -a; history -n'
+history -n
+export PROMPT_COMMAND='history -a'
 export HISTTIMEFORMAT='%F %T '
 export HISTSIZE=10000
 export HISTCONTROL=ignoredups
