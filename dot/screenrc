@@ -1,14 +1,13 @@
 #
 # ~/.screenrc
 #
+defscrollback	2000
+deflogin	on
+hardcopy_append	on
 activity	"activity in %n (%t) [%w:%s]~"
 bell_msg	"message in %n (%t) [%w:%s]~"
-deflogin	on
-defscrollback	2000
-hardcopy_append	on
 hardstatus	alwayslastline "%{= kY} %H | %Y-%m-%d %c:%s | Load: %l | %w"
-term		xterm-color
-shell		-$SHELL
+term		xterm
 screen -t a
 screen -t b
 screen -t c
