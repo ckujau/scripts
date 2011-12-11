@@ -1,0 +1,32 @@
+#!/usr/bin/env expect -f
+#
+# (c) 2011, lists@nerdbynature.de
+# 1) Login to a terminalserver (Bay Networks Remote Annex 2000)
+# 2) Execute a command on a Remote Power Boot Switch (WTI RPB+)
+#
+
+if {$argc!=4} {
+send_user "   Usage: $argv0 \[server\] \[port\] \[password\] \[command\]\n"
+send_user "Commands: /s /d /\[1-5\]\[on|off|boot\]\n"
+send_user " Example: $argv0 ts 3 s3cr3t \"/2 boot\"\n"
+exit
+}
+
+set timeout -1
+set server   [lindex $argv 0]
+set port     [lindex $argv 1]
+set password [lindex $argv 2]
+set command  [lindex $argv 3]
+
+spawn telnet "$server"
+
+send -- "$port\r"
+expect "Port password:"
+send -- "$password\r"
+expect "Attached to port $port"
+send -- "\n\r"
+expect "RPB+>"
+# sleep 1
+send -- "$command\r"
+expect "RPB+>"
+close
