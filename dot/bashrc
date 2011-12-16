@@ -19,9 +19,9 @@ export PAGER='less'
 export LESS='--ignore-case --squeeze-blank-lines --no-init'
 export EDITOR=vi
 
-alias mv='mv -iv'
-alias cp='cp -iv'
-alias rm='rm -iv'
+alias mv='mv -i'
+alias cp='cp -i'
+alias rm='rm -i'
 
 if [ -z "$BASH_COMPLETION" -a -f /etc/bash_completion ]; then
 	. /etc/bash_completion
