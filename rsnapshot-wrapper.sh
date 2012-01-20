@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # (c) 2009 lists@nerdbynature.de
+#
 # Rsnapshot wrapper script
 #
 LANG=C
@@ -20,16 +21,18 @@ INTERVAL="$1"
 log "**** ======================================================="
 log "**** $INTERVAL backup started..."
 
-# Rsnapshot needs perl anyway, and not all systems have GNU/date
+# Rsnapshot needs perl anyway but not all systems have GNU/date
 BEGIN_G=`perl -e 'print time'`
-for c in $CONFDIR/*-*.conf; do
+for c in $CONFDIR/*.conf; do
 	echo
 	BEGIN=`perl -e 'print time'`
 
 	# We're parsing our configuration file for:
+	#
 	# - ROOT, RLOG		- standard rsnapshot options
 	# - HOST, PORT, OS, TAG	- mandatory for this wrapper
-	# - RDY			- we shall only backup if this file exists on the remot host
+	# - RDY			- we shall only backup if this file exists on the remote host
+	#
 	# We're using them to identify the system correctly and will only
 	# backup if the client wants us to.
 	#
@@ -37,7 +40,10 @@ for c in $CONFDIR/*-*.conf; do
 	eval `awk      '/^snapshot_root/ {print "ROOT="$2}; /^logfile/ {print "RLOG="$2}' $c`
 	eval `awk -F\# '/^##HOST=/       {print $3}' "$c"`
 
-	if [ ! -d "$ROOT" -o ! -w "$ROOT" ]; then
+	# test -w would return true even when ROOT is mounted r/o, so let's touch(1) it.
+	if [ -d "$ROOT" ] && touch "$ROOT" 2>/dev/null; then
+		:
+	else
 		log "**** $ROOT is not a writable directory!"
 		continue
 	fi
@@ -52,7 +58,7 @@ for c in $CONFDIR/*-*.conf; do
 	# We need to know if we're about to backup the correct system, but
 	# we can't rely on e.g. SSH hostkeys (think of multiboot systems with
 	# the same DNS name). The hostid should be good enough. Unfortunately,
-	# MacOSX doesn't provide one and we're down to the OS again - oh well.
+	# MacOSX doesn't provide one, so we're down to the OS again - oh well.
 	case "$OS" in
 		Darwin)
 		TAG2=`ssh -p$PORT $HOST "uname -s" 2>/dev/null`
@@ -76,6 +82,7 @@ for c in $CONFDIR/*-*.conf; do
 		$DEBUG rsync --port="$PORT" $HOST:"$RDY" "$TEMP" 2>/dev/null
 		if [ ! $? = 0 ]; then
 			log "**** File \""$HOST":"$RDY"\" ($OS) not found, skipping!"
+			$DEBUG rm -f "$TEMP"
 			echo
 			continue
 		else
