@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # (c)2010, lists@nerdbynature.de
+#
 # Install a new kernel, System.map and .config,
 # but not via the usual "make install" routine
 #
@@ -15,8 +16,8 @@ if [ ! `id -u` = 0 ]; then
 fi
 
 usage() {
-echo "Usage: `basename $0` directory builddir"
-echo "                   [user@]host:directory builddir"
+echo "Usage: `basename $0`             [directory] [builddir]"
+echo "       `basename $0` [user@]host:[directory] [builddir]"
 exit 1
 }
 
