@@ -4,10 +4,10 @@
 # External proxy for transparent proxying
 # https://forum.openwrt.org/viewtopic.php?id=18582
 #
-SRC=192.168.0.0/24
+SRC=10.0.0.0/24
 IFACE=br-lan
-ROUTER=192.168.0.2
-PROXY=192.168.0.106
+ROUTER=10.0.0.1
+PROXY=10.0.0.30
 PROXY_PORT=3128
 
 case $1 in
