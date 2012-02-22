@@ -8,6 +8,7 @@ set showcmd		" Show (partial) command in status line
 set showmatch		" Show matching brackets
 set noincsearch		" Incremental search sucks
 set t_ti= t_te=		" Don't blank on exit
+set nolist		" Don't show special characters
 
 " Syntax highlighting
 if has("syntax")
