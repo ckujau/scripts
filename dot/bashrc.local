@@ -1,0 +1,8 @@
+#
+# ~/.bashrc.local
+#
+export PS1='\[\033[1;31m\]\h#\[\033[0m\] '
+
+if [ -d /opt/local/bin ]; then
+	export PATH=/opt/local/sbin:/opt/local/bin:$PATH
+fi
