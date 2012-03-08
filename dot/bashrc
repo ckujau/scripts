@@ -23,8 +23,9 @@ alias mv='mv -i'
 alias cp='cp -i'
 alias rm='rm -i'
 
-if [ -z "$BASH_COMPLETION" -a -f /etc/bash_completion ]; then
-	. /etc/bash_completion
+if [ -z "$BASH_COMPLETION" ]; then
+	[ -f /etc/bash_completion ] && . /etc/bash_completion
+	[ -f /opt/local/etc/bash_completion ] && . /opt/local/etc/bash_completion
 fi
 
 if [ -f "$HOME"/.bashrc.local ]; then
