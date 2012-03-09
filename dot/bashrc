@@ -13,7 +13,7 @@ export PROMPT_COMMAND='history -a'
 export TERM=xterm-color
 export HISTTIMEFORMAT='%F %T '
 export HISTSIZE=10000
-export HISTCONTROL=ignoredups
+export HISTCONTROL="ignoredups:ignorespace"
 export GREP_OPTIONS='--color=tty --devices=skip'
 export PAGER='less'
 export LESS='--ignore-case --squeeze-blank-lines --no-init'
