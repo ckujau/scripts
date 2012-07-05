@@ -1,0 +1,56 @@
+#
+# /etc/munin/plugin-conf.d/munin-node
+#
+# user <user>         # Set the user to run the plugin as.
+# group <group>       # Set the group to run the plugin as.
+# command <command>   # Run <command> instead of the plugin. %c expands to
+#                       what would normally be run.
+# env.<variable> <value> # Sets <variable> in the plugin's environment, see the
+#                       individual plugins to find out which variables they
+#                       care about.
+#
+[df*]
+env.exclude none unknown iso9660 squashfs udf romfs ramfs devtmpfs debugfs tmpfs binfmt_misc rpc_pipefs ecryptfs
+env.warning  92
+env.critical 98
+
+[exim_mailqueue]
+group adm, (Debian-exim)
+
+[exim_mailstats]
+group adm, (Debian-exim)
+env.logdir /var/log/exim4/
+env.logname mainlog
+
+[if_*]
+user root
+
+[ip_*]
+user root
+
+[mysql*]
+user root
+env.mysqlopts --defaults-file=/etc/mysql/debian.cnf
+env.mysqluser debian-sys-maint
+env.mysqlconnection DBI:mysql:mysql;mysql_read_default_file=/etc/mysql/debian.cnf
+
+[postfix*]
+user root
+env.logfile mail.log
+env.logdir /var/log/syslog
+
+[postgres_*]
+user postgres
+env.PGUSER postgres
+env.PGPORT 5432
+
+# Run as root when /proc is mounted with hidepid options
+# [processes]
+# user root
+
+[sendmail*]
+user root
+env.mspqueue /var/spool/clientmqueue
+
+[smart_*]
+user root

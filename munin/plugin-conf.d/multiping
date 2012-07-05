@@ -1,0 +1,4 @@
+[multiping]
+env.hosts 10.0.0.2,10.0.0.3
+env.names foo.example.com,bar.example.com
+env.ping_args -A -c 5 -w 2

@@ -1,0 +1,4 @@
+[multips]
+user root
+env.names php apache
+env.regex_php ^[0-9]* /usr/bin/php-cgi
