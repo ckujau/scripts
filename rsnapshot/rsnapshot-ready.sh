@@ -1,6 +1,7 @@
 #!/bin/sh
 #
-# (c)2009 lists@nerdbynature.de
+# (c) 2009 Christian Kujau <lists@nerdbynature.de>
+#
 # Check for certain directories to be in place. If they are,
 # create a file which says that we're ready to be backed up.
 #
@@ -21,7 +22,7 @@ for d in $@; do
 	test -n "$DEBUG" && echo "DIR: $DIR"
 
 	# check if we're mounted
-	mount | grep "$DIR " > /dev/null
+	mount | grep "$DIR type" > /dev/null
 	if [ $? = 0 ]; then
 		$DEBUG touch "$FILE"
 	else
