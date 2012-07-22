@@ -204,7 +204,7 @@ case $1 in
 
 	stats)
 	# Not Y3K safe :-)
-	for h in `awk '/^2[0-9].*\((daily|weekly|monthly)\) finished/ {print $5}' "$LOG" | sort -u`; do
+	for h in `awk '/^2[0-9].*\((hourly|daily|weekly|monthly)\) finished/ {print $5}' "$LOG" | sort -u`; do
 		printf "Host $h took an average of "
 		egrep "${h}.*finished" "$LOG" | awk '{sum+=$9} END {print sum/NR " minutes to complete."}'
 	done
