@@ -165,8 +165,14 @@ else
 	. "$CONF"
 
 	# We need these to run
-	if [ -z "$CONFDIR" -o -z "$LOG" -o -z "$PIDFILE" ]; then
-		log "**** Please check that CONFDIR, LOG, PIDFILE is set in $CONF!" 1
+	if [ ! -d "$CONFDIR" -o -z "$LOG" -o -z "$PIDFILE" ]; then
+		log "**** Please check CONFDIR, LOG, PIDFILE in $CONF!" 1
+	fi
+
+	# We also need configuration file(s)
+	ls "$CONFDIR"/*.conf > /dev/null 2>&1
+	if [ ! $? = 0 ]; then
+		log "**** There are no configuration files in $CONFDIR!" 1
 	fi
 
 	# run only once
