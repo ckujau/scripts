@@ -203,14 +203,15 @@ case $1 in
 	;;
 
 	stats)
-	for h in `awk '/^20[0-9][0-9].*finished/ {print $5}' "$LOG" | sort -u`; do
+	# Not Y3K safe :-)
+	for h in `awk '/^2[0-9].*\((daily|weekly|monthly)\) finished/ {print $5}' "$LOG" | sort -u`; do
 		printf "Host $h took an average of "
 		egrep "${h}.*finished" "$LOG" | awk '{sum+=$9} END {print sum/NR " minutes to complete."}'
 	done
 
 	echo "----"
 	for t in hourly daily weekly monthly; do
-		grep -q "$t" "$LOG" || continue
+		grep "$t" "$LOG" > /dev/null || continue
 		printf "The $t backup took an average of "
 		egrep "${t} backup finished after" "$LOG" | awk '{sum+=$9} END {print sum/NR " minutes to complete."}'
 	done
