@@ -26,7 +26,14 @@ else
 	DIR="$1"
 fi
 
-date
+# Use 'gdate' if available, 'date' otherwise
+if [ "`which gdate`" ]; then
+	DATE=gdate
+else
+	DATE=date
+fi
+
+$DATE
 # We have checks too :-)
 if [ "$2" = "-c" ]; then
 	for f in "$DIR"/*.bz2; do
@@ -41,7 +48,7 @@ if [ "$2" = "-c" ]; then
 exit 0
 fi
 
-BEGIN=`date +%s`
+BEGIN=`$DATE +%s`
 for db in `mysql --batch --skip-column-names -e 'show databases' | sort`; do
 	printf "Backing up "$db"...."
 	# - Use multiple-row INSERT syntax that include several VALUES lists
@@ -53,15 +60,19 @@ for db in `mysql --batch --skip-column-names -e 'show databases' | sort`; do
 	# - Using --skip-dump-date (added in v5.0.52) so that the dump won't change unnecessarily.
 	# - Included stored routines
 	# - Include triggers for each dumped table
-	if [ "$db" = "information_schema" ]; then
+	case "$db" in
+	performance_schema|information_schema)
 		# Access denied for user 'root'@'localhost' to database 'information_schema' when using LOCK TABLES
 		# http://bugs.mysql.com/bug.php?id=21527 (closed)
 		# http://bugs.mysql.com/bug.php?id=33762 (closed)
 		# http://bugs.mysql.com/bug.php?id=49633
 		OPTIONS="--extended-insert --force --flush-logs --flush-privileges --skip-lock-tables --hex-blob --routines --triggers"
-	else
+	;;
+
+	*)
 		OPTIONS="--extended-insert --force --flush-logs --flush-privileges --lock-tables      --hex-blob --routines --triggers"
-	fi
+	;;
+	esac
 
 	if [ -n "$DEBUG" ]; then
 		$DEBUG mysqldump $OPTIONS "$db"   egrep -v -- '^-- Dump completed on'   "$DIR"/DB_"$db".sql.new
@@ -105,6 +116,6 @@ for db in `mysql --batch --skip-column-names -e 'show databases' | sort`; do
 	fi
 	$DEBUG
 done
-END=`date +%s`
+END=`$DATE +%s`
 echo "$0 finished after `echo $END - $BEGIN | bc` seconds."
 echo
