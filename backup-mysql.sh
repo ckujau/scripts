@@ -13,7 +13,7 @@
 #
 # Privileges needed: SELECT, RELOAD, LOCK TABLES
 #
-PATH=/bin:/usr/bin:/usr/local/bin
+PATH=/bin:/usr/bin:/usr/local/bin:/opt/csw/bin:/usr/sfw/bin
 HASH=sha1			# See 'openssl dgst -h' for possible values
 
 # unset me!
