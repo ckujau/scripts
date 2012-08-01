@@ -1,0 +1,53 @@
+#
+# My .dailystrips.defs
+# http://dailystrips.sourceforge.net/
+#
+
+strip apod
+	name Astronomy Picture of the Day
+	homepage http://apod.nasa.gov/apod/ap%y%m%d.html
+	baseurl http://apod.nasa.gov/apod/
+	type search
+	searchpage http://apod.nasa.gov/apod/ap%y%m%d.html
+	searchpattern <a href="(image/%y%m/.+?.(gif|jpg))">
+	provides any
+end
+
+strip dilbert
+	name Dilbert
+	homepage http://dilbert.com/fast/%Y-%m-%d/
+	baseurl http://dilbert.com
+	type search
+	searchpage http://dilbert.com/strips/comic/%Y-%m-%d/
+	searchpattern <input.+?value="(/dyn/str_strip/\d+.*\d+\.strip\.print\.(gif|jpg))"
+	provides any
+end
+
+strip garfield
+	name Garfield
+	homepage http://www.ucomics.com/garfield/%Y/%m/%d/
+	type search
+	searchpage http://www.gocomics.com/printable/garfield/%Y/%m/%d/
+	searchpattern src="(http:\/\/cdn.svcs.c2.uclick.com\/c2\/[0-9a-f]+)"
+	provides any
+end
+
+# Peanuts is now on GoComics
+# https://twitter.com/gocomics/status/41919641949442048
+strip peanuts
+	name Peanuts
+	homepage http://www.gocomics.com/peanuts/%Y/%m/%d/
+	type search
+	searchpage http://www.gocomics.com/printable/peanuts/%Y/%m/%d/
+	searchpattern src="(http:\/\/cdn.svcs.c2.uclick.com\/c2\/[0-9a-f]+)"
+	provides any
+end
+
+strip userfriendly
+	name User Friendly
+	homepage http://ars.userfriendly.org/cartoons/?id=%Y%m%d
+	type search
+	searchpage http://ars.userfriendly.org/cartoons/?id=%Y%m%d&mode=classic
+	searchpattern <img.+?src="(http://www\.userfriendly\.org/cartoons/archives/%y.+?/uf.+?\.gif)"
+	provides any
+end
