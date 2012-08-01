@@ -28,18 +28,16 @@ strip garfield
 	homepage http://www.ucomics.com/garfield/%Y/%m/%d/
 	type search
 	searchpage http://www.gocomics.com/printable/garfield/%Y/%m/%d/
-	searchpattern src="(http:\/\/cdn.svcs.c2.uclick.com\/c2\/[0-9a-f]+)"
+	searchpattern src="(http:\/\/assets.amuniversal.com\/[0-9a-f]+)"
 	provides any
 end
 
-# Peanuts is now on GoComics
-# https://twitter.com/gocomics/status/41919641949442048
 strip peanuts
 	name Peanuts
 	homepage http://www.gocomics.com/peanuts/%Y/%m/%d/
 	type search
 	searchpage http://www.gocomics.com/printable/peanuts/%Y/%m/%d/
-	searchpattern src="(http:\/\/cdn.svcs.c2.uclick.com\/c2\/[0-9a-f]+)"
+	searchpattern src="(http:\/\/assets.amuniversal.com\/[0-9a-f]+)"
 	provides any
 end
 
