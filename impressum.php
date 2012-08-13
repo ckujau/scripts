@@ -23,16 +23,18 @@
  */
 include_once 'vars.php';
 
-echo "<?xml version=\"1.0\"?>
-<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
-    \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
+echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<!DOCTYPE html PUBLIC
+	\"-//W3C//DTD XHTML 1.1//EN\"
+	\"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">
 <html xmlns=\"http://www.w3.org/1999/xhtml\">
 <head>
 <title>$host: Impressum</title>
 </head>
 <body>
-$name<br />
-$city<br />
+<p>
+$name<br/>
+$city</p>
 <p>Die Postaddresse kann via <a href=\"mailto:$mail@$host\">Email</a> erfragt werden oder via <a href=
 \"http://www.denic.de/de/hintergrund/whois-service/webwhois.html\">whois</a> fuer die Domain <a href=\"http://$host\">$host</a> abgefragt
 werden.<br /></p>

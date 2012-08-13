@@ -1,0 +1,5 @@
+[tor_traffic]
+user tor
+env.conf /usr/local/etc/torrc
+env.port 9051
+env.password s3cr3t
