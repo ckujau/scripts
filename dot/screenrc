@@ -9,3 +9,8 @@ bell_msg	"message in %n (%t) [%w:%s]~"
 hardstatus	alwayslastline "%{= kY} %H | %Y-%m-%d %c:%s | Load: %l | %w"
 term		xterm
 source		${HOME}/.screenrc.local
+
+# hardstatus	ignore
+# escape	^Aa
+# screen	-T xterm -t foo
+# screen	-T xterm -t bar
