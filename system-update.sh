@@ -4,28 +4,27 @@
 #
 # Automatic upgrades for various distributions.
 #
+# Note: For Linux systems "lsb_release" could be used, but may
+# not be installed so we try to determine the distributer the
+# old fashion way.
+#
 if [ ! "$1" = "-f" ]; then
 	echo "Usage: `basename $0` [-f]"
 	echo
 	DEBUG=echo
 else
 	umask 0022
-	PATH=/bin:/usr/bin:/sbin:/usr/sbin:/opt/local/bin:/usr/local/sbin:/opt/csw/bin
+	PATH=/bin:/usr/bin:/sbin:/usr/sbin:/opt/local/bin:/opt/csw/bin
 	date
 fi
 
 # Linux
-#
-# Note: For Linux systems "lsb_release" could be used, but may
-# not be installed so we try to determine the distributer the
-# old fashion way.
-#
 if [ $(uname -s) = "Linux" ]; then
 	# Debian/Ubuntu
 	if [ -f /etc/debian_version ]; then
 		APT_LISTCHANGES_FRONTEND=none
 		DEBIAN_FRONTEND=noninteractive
-		$DEBUG apt-get -q update
+		$DEBUG apt-get -qq update
 		$DEBUG apt-get -q -y -V dist-upgrade
 		$DEBUG apt-get -q clean
 		$DEBUG deborphan --guess-all
@@ -69,7 +68,7 @@ fi
 
 # SunOS/Solaris
 if [ $(uname -s) = "SunOS" ]; then
-	# TODO: IPS
+	# IPS?
 	:
 
 	# OpenCSW
@@ -77,12 +76,5 @@ if [ $(uname -s) = "SunOS" ]; then
 		$DEBUG pkgutil --catalog  --upgrade --yes
 	fi
 
-	# pca
-	# TODO: non-interactive updates?
-	if [ -f "$HOME"/.pca ]; then
-		$DEBUG mkdir -p /var/tmp/patches
-		$DEBUG cd patches
-		# Download (and keep) all missing recommended and security patches
-		$DEBUG pca --download --install missingrs
-	fi
+	exit 0
 fi
