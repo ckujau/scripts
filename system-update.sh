@@ -4,17 +4,29 @@
 #
 # Automatic upgrades for various distributions.
 #
-# Note: For Linux systems "lsb_release" could be used, but may
-# not be installed so we try to determine the distributer the
-# old fashion way.
-#
+if [ "$1" = "--selfupdate" ]; then
+	printf "This will update $0 - continue? (y/N)   "
+	read c
+	if [ "$c" = y ]; then
+		wget -q "https://raw.github.com/ckujau/scripts/master/system-update.sh" -O "$0"
+		exit $?
+	else
+		exit $?
+	fi
+fi
+
 if [ ! "$1" = "-f" -o -z "$2" ]; then
 	echo
 	echo "Usage: `basename $0` [-f] [logfile]"
+	echo "       `basename $0` --selfupdate"
 	echo
-	DEBUG=echo
-	  LOG=/dev/null
-	set -x
+	if [ "$DEBUG" = 1 ]; then
+		DEBUG=echo
+		LOG=/dev/null
+		set -x
+	else
+		exit 1
+	fi
 else
 	umask 0022
 	PATH=/bin:/usr/bin:/sbin:/usr/sbin:/opt/local/bin:/opt/csw/bin
@@ -34,7 +46,13 @@ if [ "$REBOOT" = 0 ]; then
 fi
 }
 
+#
+# Find out which OS we are on.
+#
 # Linux
+# Note: For Linux systems "lsb_release" could be used, but may
+# not be installed so we try to determine the distributer the
+# old fashion way.
 if [ $(uname -s) = "Linux" ]; then
 	# Debian/Ubuntu
 	if [ -f /etc/debian_version ]; then
