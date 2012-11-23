@@ -44,6 +44,7 @@ if [ "$REBOOT" = 0 ]; then
 		echo "$0: Reboot may be required!" | tee -a /etc/motd
 	fi
 fi
+exit 0
 }
 
 #
@@ -118,7 +119,6 @@ if [ $(uname -s) = "Darwin" ]; then
 	# Reboot required?
 	grep 'Reboot' "$LOG" > /dev/null
 	REBOOT=$? rebootmsg
-	exit 0
 fi
 
 # SunOS/Solaris
@@ -136,5 +136,4 @@ if [ $(uname -s) = "SunOS" ]; then
 	# Reboot required?
 	# grep 'foo' "$LOG" > /dev/null
 	# REBOOT=$? rebootmsg
-	exit 0
 fi
