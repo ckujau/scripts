@@ -8,46 +8,78 @@
 # not be installed so we try to determine the distributer the
 # old fashion way.
 #
-if [ ! "$1" = "-f" ]; then
-	echo "Usage: `basename $0` [-f]"
+if [ ! "$1" = "-f" -o -z "$2" ]; then
+	echo
+	echo "Usage: `basename $0` [-f] [logfile]"
 	echo
 	DEBUG=echo
+	  LOG=/dev/null
+	set -x
 else
 	umask 0022
 	PATH=/bin:/usr/bin:/sbin:/usr/sbin:/opt/local/bin:/opt/csw/bin
+	 LOG="$2"
 	date
 fi
+		
+rebootmsg() {
+if [ "$REBOOT" = 0 ]; then
+	# A reboot may be required. But don't flood our motd.
+	grep "Reboot may be required" /etc/motd > /dev/null
+	if [ $? = 0 ]; then
+		:
+	else
+		echo "$0: Reboot may be required!" | tee -a /etc/motd
+	fi
+fi
+}
 
 # Linux
 if [ $(uname -s) = "Linux" ]; then
 	# Debian/Ubuntu
 	if [ -f /etc/debian_version ]; then
+		(
 		APT_LISTCHANGES_FRONTEND=none
 		DEBIAN_FRONTEND=noninteractive
 		$DEBUG apt-get -qq update
 		$DEBUG apt-get -q -y -V dist-upgrade
 		$DEBUG apt-get -q clean
 		$DEBUG deborphan --guess-all
+		) > "$LOG"
+
+		# Reboot required?
+		grep 'linux-image' "$LOG" > /dev/null
+		REBOOT=$? rebootmsg
 	fi
 
 	# Redhat/Fedora/CentOS
 	if [ -f /etc/redhat-release ]; then
+		(
 		# Note: --assumeyes is unknown to older Yum versions
 		$DEBUG yum -y update
 		$DEBUG yum clean all
+		) > "$LOG"
+
+		# Reboot required?
+		grep 'Verifying  : kernel-' "$LOG" > /dev/null
+		REBOOT=$? rebootmsg
 	fi
 fi
 
 # Darwin/MacOS X
 if [ $(uname -s) = "Darwin" ]; then
 	# MacOS
+	(
 	$DEBUG softwareupdate --install --all --verbose
+	) > "$LOG"
 
 	# MacPorts
 	if [ -n "$(port version)" ]; then
+		(
 		$DEBUG port selfupdate
 		$DEBUG port echo outdated 
 		$DEBUG port upgrade -u outdated
+		) >> "$LOG"
 
 		# Whan was the last time we did "port clean"?
 		LAST="$HOME"/.ports.clean
@@ -64,6 +96,10 @@ if [ $(uname -s) = "Darwin" ]; then
 			touch "$LAST"
 		fi
 	fi
+
+	# Reboot required?
+	grep 'Reboot' "$LOG" > /dev/null
+	REBOOT=$? rebootmsg
 fi
 
 # SunOS/Solaris
@@ -73,7 +109,9 @@ if [ $(uname -s) = "SunOS" ]; then
 
 	# OpenCSW
 	if [ -f /opt/csw/etc/pkgutil.conf ]; then
+		(
 		$DEBUG pkgutil --catalog  --upgrade --yes
+		) > "$LOG"
 	fi
 
 	exit 0
