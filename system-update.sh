@@ -19,7 +19,7 @@ else
 	umask 0022
 	PATH=/bin:/usr/bin:/sbin:/usr/sbin:/opt/local/bin:/opt/csw/bin
 	 LOG="$2"
-	date
+	date > "$LOG"
 fi
 		
 rebootmsg() {
@@ -45,7 +45,7 @@ if [ $(uname -s) = "Linux" ]; then
 		$DEBUG apt-get -q -y -V dist-upgrade
 		$DEBUG apt-get -q clean
 		$DEBUG deborphan --guess-all
-		) > "$LOG"
+		) >> "$LOG"
 
 		# Reboot required?
 		grep 'linux-image' "$LOG" > /dev/null
@@ -58,7 +58,7 @@ if [ $(uname -s) = "Linux" ]; then
 		# Note: --assumeyes is unknown to older Yum versions
 		$DEBUG yum -y update
 		$DEBUG yum clean all
-		) > "$LOG"
+		) >> "$LOG"
 
 		# Reboot required?
 		grep 'Verifying  : kernel-' "$LOG" > /dev/null
@@ -71,7 +71,7 @@ if [ $(uname -s) = "Darwin" ]; then
 	# MacOS
 	(
 	$DEBUG softwareupdate --install --all --verbose
-	) > "$LOG"
+	) >> "$LOG"
 
 	# MacPorts
 	if [ -n "$(port version)" ]; then
@@ -111,7 +111,7 @@ if [ $(uname -s) = "SunOS" ]; then
 	if [ -f /opt/csw/etc/pkgutil.conf ]; then
 		(
 		$DEBUG pkgutil --catalog  --upgrade --yes
-		) > "$LOG"
+		) >> "$LOG"
 	fi
 
 	exit 0
