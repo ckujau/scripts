@@ -118,6 +118,7 @@ if [ $(uname -s) = "Darwin" ]; then
 	# Reboot required?
 	grep 'Reboot' "$LOG" > /dev/null
 	REBOOT=$? rebootmsg
+	exit 0
 fi
 
 # SunOS/Solaris
@@ -132,5 +133,8 @@ if [ $(uname -s) = "SunOS" ]; then
 		) >> "$LOG"
 	fi
 
+	# Reboot required?
+	# grep 'foo' "$LOG" > /dev/null
+	# REBOOT=$? rebootmsg
 	exit 0
 fi
