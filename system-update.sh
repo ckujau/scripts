@@ -98,7 +98,7 @@ if [ $(uname -s) = "Darwin" ]; then
 		$DEBUG port selfupdate
 		$DEBUG port echo outdated 
 		$DEBUG port upgrade -u outdated
-		) >> "$LOG"
+		) >> "$LOG" 2>&1
 
 		# Whan was the last time we did "port clean"?
 		LAST="$HOME"/.ports.clean
