@@ -67,7 +67,7 @@ if [ $(uname -s) = "Linux" ]; then
 		) >> "$LOG"
 
 		# Reboot required?
-		grep 'linux-image' "$LOG" > /dev/null
+		grep -q 'linux-image' "$LOG"
 		REBOOT=$? rebootmsg
 	fi
 
@@ -76,12 +76,24 @@ if [ $(uname -s) = "Linux" ]; then
 		(
 		# Note: --assumeyes is unknown to older Yum versions
 		$DEBUG yum -y update
-		$DEBUG yum clean all
+		$DEBUG yum clean packages
 		) >> "$LOG"
 
 		# Reboot required?
-		grep 'Verifying  : kernel-' "$LOG" > /dev/null
+		grep -q 'Verifying  : kernel-' "$LOG"
 		REBOOT=$? rebootmsg
+	fi
+
+	# SUSE, openSUSE
+	if [ -f /etc/SuSE-release ]; then
+		(
+		$DEBUG zypper --quiet --non-interactive update
+		$DEBUG zypper clean
+		) >> "$LOG"
+
+#		# Reboot required?
+#		grep -q 'Verifying  : kernel-' "$LOG"
+#		REBOOT=$? rebootmsg
 	fi
 fi
 
@@ -117,7 +129,7 @@ if [ $(uname -s) = "Darwin" ]; then
 	fi
 
 	# Reboot required?
-	grep 'Reboot' "$LOG" > /dev/null
+	grep -q 'Reboot' "$LOG"
 	REBOOT=$? rebootmsg
 fi
 
