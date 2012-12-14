@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 #
 # (c)2012 Christian Kujau <lists@nerdbynature.de>
 #
