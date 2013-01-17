@@ -1,5 +1,8 @@
 #!/bin/sh
 #
+# (C)2013, lists@nerdbynature.de
+# dm-crypt tester
+#
 
 # DEBUG=echo
 RUNS=0
