@@ -60,9 +60,10 @@ if [ $(uname -s) = "Linux" ]; then
 		(
 		APT_LISTCHANGES_FRONTEND=none
 		DEBIAN_FRONTEND=noninteractive
-		$DEBUG apt-get -qq update
-		$DEBUG apt-get -q -y -V dist-upgrade
-		$DEBUG apt-get -q clean
+		$DEBUG apt-get --quiet=2 update
+		$DEBUG apt-get --quiet --yes --verbose-versions \
+			--option Dpkg::Options::="--force-confdef --force-confold" dist-upgrade
+		$DEBUG apt-get --quiet clean
 		$DEBUG deborphan --guess-all
 		) >> "$LOG"
 
