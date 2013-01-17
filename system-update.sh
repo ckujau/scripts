@@ -41,7 +41,7 @@ if [ "$REBOOT" = 0 ]; then
 	if [ $? = 0 ]; then
 		:
 	else
-		echo "$0: Reboot may be required!" | tee -a /etc/motd
+		echo "$0: Reboot may be required! (`date`)" | tee -a /etc/motd
 	fi
 fi
 exit 0
