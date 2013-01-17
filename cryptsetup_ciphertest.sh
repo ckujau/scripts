@@ -5,7 +5,6 @@
 #
 
 # DEBUG=echo
-RUNS=0
 
 if [ ! -b "$1" ]; then
 	echo "Usage: $0 [device]"
