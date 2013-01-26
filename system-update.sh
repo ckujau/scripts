@@ -103,6 +103,7 @@ if [ $(uname -s) = "Darwin" ]; then
 	# MacOS
 	(
 	$DEBUG softwareupdate --install --all --verbose
+	$DEBUG diskutil umount "Recovery HD"
 	) >> "$LOG"
 
 	# MacPorts
