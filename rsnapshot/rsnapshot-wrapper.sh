@@ -71,7 +71,7 @@ for c in $CONFDIR/*.conf; do
 	fi
 
 	# See if the remote system is up & running
-	nc -w1 -z $HOST $PORT
+	nc -w1 -z $HOST $PORT > /dev/null
 	if [ ! $? = 0 ]; then
 		log "**** Host $HOST not responding on port $PORT, skipping!"
 		continue
