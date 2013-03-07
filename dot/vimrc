@@ -10,6 +10,7 @@ set showmatch			" Show matching brackets
 set noincsearch			" Incremental search sucks
 set t_ti= t_te=			" Don't blank on exit
 set nolist				" Don't show special characters
+set nonumber			" Don't show line numbers
 
 " Syntax highlighting
 if has("syntax")
