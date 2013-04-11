@@ -10,12 +10,19 @@
 #   "shasum" is a Perl script and preliminary tests have shown that it's
 #   twice as slow as "sha1sum" (a C binary) from the coreutils package.
 #
-# TODO: Make script portable accross operating systems
+# We have some actual numbers now: generating the SHA1 checksum
+# of a 1 MB file, for 100 runs:
+#  shasum COUNT: 100 TIME: 38 seconds		- perl
+# openssl COUNT: 100 TIME:  7 seconds		- openssl
+# sha1sum COUNT: 100 TIME:  1 seconds		- coreutils
+#
+# As we're going to have different routines for setting/getting EAs for each
+# operating system anyway, we'll have different routines for checksums as well.
 #
 DIGEST="sha256"			# sha1, sha256, sha512
 
 # Adjust if needed
-PATH=/bin:/usr/bin:/opt/csw/bin:/usr/sfw/bin
+PATH=/bin:/usr/bin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
 
 # It's really hard to find a delimiter to get _only_ the checksum from openssl(1).
 # Think of filenames like "test with space and equal sign=).txt" and look at
