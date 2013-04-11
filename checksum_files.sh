@@ -26,11 +26,25 @@ DIGEST="sha256"			# sha1, sha224, sha256, sha384, sha512
 # Adjust if needed
 PATH=/bin:/usr/bin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
 
-# It's really hard to find a delimiter to get _only_ the checksum from openssl(1).
-# Think of filenames like "test with space and equal sign=).txt" and look at
-# openssl's default output. Our best bet is to look at the N last characters,
-# where N depends on the digest used:
-LENGTH=$(echo test | openssl $DIGEST | awk '{printf $2}' | wc --chars)
+# We will need to retrieve ONLY checksum later on. But it's really hard to find a
+# delimiter within the "FILENAME - CHECKSUM" string stored in the EA (think of
+# filenames like "file with space and_an+equal sign=).txt" and so on). We wanted to
+# use openssl(1) here, but really old versions of openssl (0.9.7) omit the fd in its
+# output, so there's another special case. We'll try shasum(1) (Perl) first, and fall
+# back to openssl(1) if this doesn't work.  Maybe we should just hardcode the
+# lenghts for each different checksum algorithm and be done with it. But that
+# would be too easy, hm?
+if   [ -x $(which shasum) ]; then
+		DIGEST_NUMBER=`echo $DIGEST | sed 's/sha//'`
+		LENGTH=$(echo test | shasum -a ${DIGEST_NUMBER} | awk '{ print length($1) }')
+
+elif [ -x $(which openssl) ]; then
+		LENGTH=$(echo test | openssl dgst -${DIGEST}    | awk '{ print length($2) }')
+
+else
+	echo "ERROR: Neither \"shasum\" nor \"openssl\" were found - cannot continue!"
+	exit 1
+fi
 
 print_usage()
 {
