@@ -58,7 +58,54 @@ echo "$1"
 # while working on FILES
 
 do_darwin() {
-	echo TBD
+# For now let's just assume that GNU coreutils are installed.
+# It's by far much faster than it's perl or openssl alternatives.
+PROGRAM=g${DIGEST}sum
+
+for f in $FILES; do
+	case $ACTION in
+		set)
+		# We don't want to store the full pathname, only the filename
+		BASENAME="`basename "$f"`"
+		cd "`dirname "$f"`" || do_log "ERROR: failed to cd into `dirname "$f"`! (FILE: $f)" 1
+
+		xattr -w user.checksum."$DIGEST" "`$PROGRAM "$BASENAME"`" "$BASENAME" ||
+			do_log "ERROR: failed to set EA for FILE $f!" 1
+
+		# Go back to where we came from
+		cd - > /dev/null
+		;;
+
+		get)
+		xattr -l -p user.checksum."$DIGEST" "$f" || \
+			do_log "ERROR: failed to get EA for FILE $f!" 1
+		;;
+
+		check)
+		# Retrieve stored checksum
+		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$f" | cut -c-$LENGTH` || \
+			do_log "ERROR: failed to get EA for FILE $f!" 1
+
+		# Calculate current checksum
+		CHECKSUM_C=`$PROGRAM "$f" | cut -c-$LENGTH` || \
+			do_log "ERROR: failed to calculate checksum for FILE $f!" 1
+
+		# Let's compare these two
+		if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
+			printf "FILE: $f - OK"
+			[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+		else
+			printf "FILE: $f - FAILED"
+			[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+		fi
+		;;
+	
+		*)
+		print_usage
+		exit 1
+		;;
+	esac
+done
 }
 
 do_freebsd() {
