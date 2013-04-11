@@ -3,7 +3,7 @@
 # (c) 2013, Christian Kujau <lists@nerdbynature.de>
 #
 # Generate checksums of files and store them via
-# xattr (Extended Attributes)
+# Extended Attributes
 #
 # Set DEBUG=1 to get more verbose output
 #
