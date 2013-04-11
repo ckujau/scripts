@@ -5,10 +5,12 @@
 # Generate checksums of files and store them via
 # xattr (Extended Attributes)
 #
-# Notes:
-# * We could use "shasum", which lets us choose the (SHA based) digest. However,
-#   "shasum" is a Perl script and preliminary tests have shown that it's
-#   twice as slow as "sha1sum" (a C binary) from the coreutils package.
+# Set DEBUG=1 to get more verbose output
+#
+# === Notes ===
+# We could use "shasum", which lets us choose the (SHA based) digest. However,
+# "shasum" is a Perl script and preliminary tests have shown that it's
+# twice as slow as "sha1sum" (a C binary) from the coreutils package.
 #
 # We have some actual numbers now: generating the SHA1 checksum
 # of a 1 MB file, for 100 runs:
@@ -48,14 +50,8 @@ fi
 do_log() {
 echo "$1"
 
-# Continue or Exit?
-case $2 in
-	1) continue
-	;;
-	
-	2) exit 2
-	;;
-esac
+# Continue with the next file
+[ "$2" = 1 ] && continue
 }
 
 # Routines for every operating system, so we don't have to switch
@@ -89,15 +85,22 @@ for f in $FILES; do
 		;;
 
 		get)
-		getfattr --absolute-names --name user.checksum."$DIGEST" "$f" || do_log 
+		# NOTE: If the designated EA is not set, getfattr may not return a non-exit code. This
+		# has been fixed upstream but may not have been picked up by your distribution.
+		# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=520659
+		# https://bugzilla.redhat.com/show_bug.cgi?id=660619
+		getfattr --absolute-names --name user.checksum."$DIGEST" "$f" || \
+			do_log "ERROR: failed to get EA for FILE $f!" 1
 		;;
 
 		check)
 		# Retrieve stored checksum
-		CHECKSUM_S=`getfattr --absolute-names --only-values --name user.checksum."$DIGEST" "$f" | cut -c-$LENGTH`
+		CHECKSUM_S=`getfattr --absolute-names --only-values --name user.checksum."$DIGEST" "$f" | cut -c-$LENGTH` || \
+			do_log "ERROR: failed to get EA for FILE $f!" 1
 
 		# Calculate current checksum
-		CHECKSUM_C=`$PROGRAM "$f" | cut -c-$LENGTH`
+		CHECKSUM_C=`$PROGRAM "$f" | cut -c-$LENGTH` || \
+			do_log "ERROR: failed to calculate checksum for FILE $f!" 1
 
 		# Let's compare these two
 		if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
