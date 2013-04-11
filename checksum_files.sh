@@ -19,7 +19,7 @@
 # As we're going to have different routines for setting/getting EAs for each
 # operating system anyway, we'll have different routines for checksums as well.
 #
-DIGEST="sha256"			# sha1, sha256, sha512
+DIGEST="sha256"			# sha1, sha224, sha256, sha384, sha512
 
 # Adjust if needed
 PATH=/bin:/usr/bin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
@@ -45,33 +45,67 @@ else
 	FILES="$@"
 fi
 
-# Routines for every operating system, so we don't have to use switches while
-# working on FILES
+do_log() {
+echo "$1"
+
+# Continue or Exit?
+case $2 in
+	1) continue
+	;;
+	
+	2) exit 2
+	;;
+esac
+}
+
+# Routines for every operating system, so we don't have to switch
+# while working on FILES
+
+do_darwin() {
+	echo TBD
+}
+
+do_freebsd() {
+	echo TBD
+}
+
 do_linux() {
+# GNU coreutils will installed on most Linux distributions. It's also by far much
+# faster than it's perl or openssl alternatives.
+PROGRAM=${DIGEST}sum
+
 for f in $FILES; do
-#	echo "ACTION: $ACTION FILE: $f"
 	case $ACTION in
 		set)
+		# We don't want to store the full pathname, only the filename
 		BASENAME="`basename "$f"`"
-		echo setfattr --name user.checksum."$DIGEST" --value "`openssl dgst -$DIGEST "$f"`" "$f"
+		cd "`dirname "$f"`" || do_log "ERROR: failed to cd into `dirname "$f"`! (FILE: $f)" 1
+
+		setfattr --name user.checksum."$DIGEST" --value "`$PROGRAM "$BASENAME"`" "$BASENAME" || \
+			do_log "ERROR: failed to set EA for FILE $f!" 1
+
+		# Go back to where we came from
+		cd - > /dev/null
 		;;
 
 		get)
-		getfattr --name user.checksum."$DIGEST" "$f"
+		getfattr --absolute-names --name user.checksum."$DIGEST" "$f" || do_log 
 		;;
 
 		check)
 		# Retrieve stored checksum
-		CHECKSUM_S=`getfattr --only-values --name user.checksum."$DIGEST" "$f"`
+		CHECKSUM_S=`getfattr --absolute-names --only-values --name user.checksum."$DIGEST" "$f" | cut -c-$LENGTH`
 
-		# Boah, did that get ugly. Let's try better next time, for now we have:
-		CHECKSUM_C=`openssl dgst -$DIGEST "$f" | rev | cut -c-$LENGTH | rev`
+		# Calculate current checksum
+		CHECKSUM_C=`$PROGRAM "$f" | cut -c-$LENGTH`
 
 		# Let's compare these two
 		if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
-			echo "FILE: $f - OK"
+			printf "FILE: $f - OK"
+			[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
 		else
-			echo "FILE: $f - FAILED ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)"
+			printf "FILE: $f - FAILED"
+			[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
 		fi
 		;;
 	
@@ -83,9 +117,17 @@ for f in $FILES; do
 done
 }
 
+do_solaris() {
+	echo TBD
+}
+
 case $(uname -s) in
 	Darwin)
 	do_darwin
+	;;
+
+	FreeBSD)
+	do_freebsd
 	;;
 
 	Linux)
