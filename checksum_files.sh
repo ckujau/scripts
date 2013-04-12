@@ -55,11 +55,10 @@ else
 	  FILE="$2"
 fi
 
+# Print, exit if necessary
 do_log() {
-echo "$FILE"
-
-# Continue with the next file
-[ "$FILE" = 1 ] && continue
+echo "$1"
+[ -n "$2" ] && exit $2
 }
 
 # Routines for every operating system, as each of them handles EAs differently
@@ -91,8 +90,10 @@ case $ACTION in
 
 	check)
 	# Retrieve stored checksum
-	CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" | cut -c-$LENGTH` || \
-			do_log "ERROR: failed to get EA for FILE $FILE!" 1
+	CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" | cut -c-$LENGTH`
+
+	# Bail out if there is no checksum to compare
+	[ -z "$CHECKSUM_S" ] && do_log "ERROR: failed to get EA for FILE $FILE!" 1
 
 	# Calculate current checksum
 	CHECKSUM_C=`$PROGRAM "$FILE" | cut -c-$LENGTH` || \
@@ -150,8 +151,10 @@ case $ACTION in
 
 	check)
 	# Retrieve stored checksum
-	CHECKSUM_S=`getfattr --absolute-names --only-values --name user.checksum."$DIGEST" "$FILE" | cut -c-$LENGTH` || \
-			do_log "ERROR: failed to get EA for FILE $FILE!" 1
+	CHECKSUM_S=`getfattr --absolute-names --only-values --name user.checksum."$DIGEST" "$FILE" | cut -c-$LENGTH`
+
+	# Bail out if there is no checksum to compare
+	[ -z "$CHECKSUM_S" ] && do_log "ERROR: failed to get EA for FILE $FILE!" 1
 
 	# Calculate current checksum
 	CHECKSUM_C=`$PROGRAM "$FILE" | cut -c-$LENGTH` || \
