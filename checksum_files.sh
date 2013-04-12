@@ -121,7 +121,7 @@ do_freebsd() {
 }
 
 do_linux() {
-# GNU coreutils will installed on most Linux distributions. It's also by far much
+# GNU coreutils will be installed on most Linux distributions. It's also by far much
 # faster than it's perl or openssl alternatives.
 PROGRAM=${DIGEST}sum
 
