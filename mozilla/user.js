@@ -59,6 +59,10 @@ lockPref("browser.startup.homepage", "about:");
 // 3 - Resume the previous browser session
 lockPref("browser.startup.page", 3);
 
+// https://bugzilla.mozilla.org/show_bug.cgi?id=648683
+// Expose tabs on-demand preference
+defaultPref("browser.sessionstore.restore_on_demand", true);
+
 // When changing "browser.newtab.url" is there any way to prevent the
 // address bar from getting focus?
 // https://support.mozilla.org/en-US/questions/929071
@@ -84,7 +88,7 @@ lockPref("browser.underline_anchors", false);
 // 0 - Disable spellchecker
 // 1 - Enable spellchecker for multi-line controls (default)
 // 2 - Enable spellchecker for multi-line controls and single-line controls
-lockPref("layout.spellcheckDefault", 0);
+defaultPref("layout.spellcheckDefault", 0);
 
 // http://kb.mozillazine.org/Network.cookie.cookieBehavior
 // 0 - All cookies are allowed (default)
@@ -155,11 +159,11 @@ lockPref("layout.css.visited_links_enabled", false);
 
 // http://kb.mozillazine.org/Network.security.ports.banned
 // A comma delimited list of port numbers to additionally block
-// pref("network.security.ports.banned", "21,80");
+// lockPref("network.security.ports.banned", "21,80");
 
 // http://kb.mozillazine.org/Network.security.ports.banned.override
 // A comma delimited list of port numbers to allow
-// pref("network.security.ports.banned.override", "8080,8443");
+// lockPref("network.security.ports.banned.override", "8080,8443");
 
 //  true - Hide certain parts of the url
 // false - All parts of the url are shown
@@ -172,16 +176,16 @@ lockPref("browser.urlbar.formatting.enabled", false);
 
 // How do I go Back/Forward and Pinch to zoom in Firefox using my MacBook Pro?
 // https://support.mozilla.org/en-US/questions/903953
-// pref("browser.gesture.swipe.down", NULL);
-// pref("browser.gesture.swipe.left", NULL);
-// pref("browser.gesture.swipe.right", NULL);
-// pref("browser.gesture.swipe.up", NULL);
+// lockPref("browser.gesture.swipe.down", NULL);
+// lockPref("browser.gesture.swipe.left", NULL);
+// lockPref("browser.gesture.swipe.right", NULL);
+// lockPref("browser.gesture.swipe.up", NULL);
 
 // Gecko user agent string reference
 // https://developer.mozilla.org/en-US/docs/Gecko_user_agent_string_reference
-// ORIG: pref("general.useragent.override", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:20.0) Gecko/20100101 Firefox/20.0");
-// ALT1: pref("general.useragent.override", "Mozilla/5.0 (X11; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0");
-lockPref("general.useragent.override", "Mozilla/5.0 (X11; Linux x86_64; rv:20.0) Gecko/20.0 Firefox/20.0");
+// ORIG: defaultPref("general.useragent.override", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:20.0) Gecko/20100101 Firefox/20.0");
+// ALT1: defaultPref("general.useragent.override", "Mozilla/5.0 (X11; Linux x86_64; rv:20.0) Gecko/20100101 Firefox/20.0");
+defaultPref("general.useragent.override", "Mozilla/5.0 (X11; Linux x86_64; rv:20.0) Gecko/20.0 Firefox/20.0");
 
 // http://kb.mozillazine.org/Browser.tabs.closeButtons
 // 0 - Display a close button on the active tab only 
@@ -198,24 +202,24 @@ lockPref("browser.tabs.insertRelatedAfterCurrent", false);
 // 1 - Open links, that would normally open in a new window, in the current tab/window
 // 2 - Open links, that would normally open in a new window, in a new window
 // 3 - Open links, that would normally open in a new window, in a new tab in the current window
-// pref("browser.link.open_newwindow", 3);
+// lockPref("browser.link.open_newwindow", 3);
 
 // http://kb.mozillazine.org/Browser.link.open_newwindow.restriction
 // 0 - Divert all links according to browser.link.open_newwindow
 // 1 - Do not divert any links (browser.link.open_newwindow will have no effect)
 // 2 - Divert all links according to browser.link.open_newwindow, unless the new
 //     window specifies how it should be displayed. 
-// pref("browser.link.open_newwindow.restriction", 0);
+// lockPref("browser.link.open_newwindow.restriction", 0);
 
 // http://kb.mozillazine.org/Layout.word_select.stop_at_punctuation
 //  true - "Word" selection includes surrounding punctuation and only stops at whitespace, so
 //         that for example double-clicking example.com/the/path and the other above-mentioned
 //         shortcuts select the entire URL
 // false - Word selection using the above mentioned shortcuts ends at punctuation characters
-// pref("layout.word_select.stop_at_punctuation", false);
+// defaultPref("layout.word_select.stop_at_punctuation", false);
 
 // http://kb.mozillazine.org/Issues_related_to_plugins
-lockPref("plugins.click_to_play", true);
+defaultPref("plugins.click_to_play", true);
 
 // http://kb.mozillazine.org/Keyword.enabled
 //  true - If Mozilla cannot determine a URL from information entered in the Location Bar,
@@ -223,18 +227,13 @@ lockPref("plugins.click_to_play", true);
 // false - Display an error message indicating the entered information is not a valid URL
 lockPref("keyword.enabled", false);
 
-// https://hg.mozilla.org/mozilla-central/file/tip/services/datareporting
-lockPref("datareporting.policy.dataSubmissionEnabled", false);
-lockPref("datareporting.policy.dataSubmissionPolicyAccepted", false);
-lockPref("datareporting.policy.dataSubmissionPolicyBypassAcceptance", false);
-
 // http://kb.mozillazine.org/Network.proxy.type
 // 0 - Direct connection, no proxy
 // 1 - Manual proxy configuration
 // 2 - Proxy auto-configuration (PAC)
 // 4 - Auto-detect proxy settings
 // 5 - Use system proxy settings
-defaultPref("network.proxy.type", 1);
+defaultPref("network.proxy.type", 0);
 
 // http://kb.mozillazine.org/Network.proxy.autoconfig_url
 // When using local PAC files:
@@ -269,5 +268,16 @@ defaultPref("network.proxy.socks_version", 5);
 //  true - Have the (SOCKS v5) proxy server perform DNS lookups
 // false - Perform DNS lookups on the client
 lockPref("network.proxy.socks_remote_dns", true);
+
+// https://hg.mozilla.org/mozilla-central/file/tip/services/datareporting
+// https://support.mozilla.org/en-US/questions/954790
+lockPref("datareporting.policy.dataSubmissionEnabled", false);
+lockPref("datareporting.policy.dataSubmissionPolicyAccepted", false);
+lockPref("datareporting.policy.dataSubmissionPolicyBypassAcceptance", false);
+
+// http://support.mozilla.org/en-US/questions/898549
+lockPref("toolkit.telemetry.enabled", false);
+lockPref("toolkit.telemetry.prompted", 2);
+lockPref("toolkit.telemetry.rejected", true); 
 
 // END
