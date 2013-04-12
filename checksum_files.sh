@@ -76,6 +76,7 @@ case $ACTION in
 	cd "`dirname "$FILE"`" || \
 			do_log "ERROR: failed to cd into `dirname "$FILE"`! (FILE: $FILE)" 1
 
+	echo "Setting user.checksum."$DIGEST" on "$FILE"..."
 	xattr -w user.checksum."$DIGEST" "`$PROGRAM "$BASENAME"`" "$BASENAME" ||
 			do_log "ERROR: failed to set EA for FILE $FILE!" 1
 
@@ -130,6 +131,7 @@ case $ACTION in
 	cd "`dirname "$FILE"`" || \
 			do_log "ERROR: failed to cd into `dirname "$FILE"`! (FILE: $FILE)" 1
 
+	echo "Setting user.checksum."$DIGEST" on "$FILE"..."
 	setfattr --name user.checksum."$DIGEST" --value "`$PROGRAM "$BASENAME"`" "$BASENAME" || \
 			do_log "ERROR: failed to set EA for FILE $FILE!" 1
 
