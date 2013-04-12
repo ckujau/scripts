@@ -26,25 +26,19 @@ DIGEST="sha256"			# sha1, sha224, sha256, sha384, sha512
 # Adjust if needed
 PATH=/bin:/usr/bin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
 
-# We will need to retrieve ONLY checksum later on. But it's really hard to find a
-# delimiter within the "FILENAME - CHECKSUM" string stored in the EA (think of
-# filenames like "file with space and_an+equal sign=).txt" and so on). We wanted to
-# use openssl(1) here, but really old versions of openssl (0.9.7) omit the fd in its
-# output, so there's another special case. We'll try shasum(1) (Perl) first, and fall
-# back to openssl(1) if this doesn't work.  Maybe we should just hardcode the
-# lenghts for each different checksum algorithm and be done with it. But that
-# would be too easy, hm?
-if   [ -x $(which shasum) ]; then
-		DIGEST_NUMBER=`echo $DIGEST | sed 's/sha//'`
-		LENGTH=$(echo test | shasum -a ${DIGEST_NUMBER} | awk '{ print length($1) }')
-
-elif [ -x $(which openssl) ]; then
-		LENGTH=$(echo test | openssl dgst -${DIGEST}    | awk '{ print length($2) }')
-
-else
-	echo "ERROR: Neither \"shasum\" nor \"openssl\" were found - cannot continue!"
-	exit 1
-fi
+# We'll need the length of our DIGEST later on. Instead of (laboriously)
+# trying to find this out ourselves, let's just hardcore those values.
+case $DIGEST in
+	  sha1) LENGTH=40 ;;
+	sha224) LENGTH=56 ;; 
+	sha256) LENGTH=64 ;; 
+	sha384) LENGTH=96 ;; 
+	sha512)	LENGTH=128 ;;
+	*)
+	echo "ERROR: Unknown DIGEST ($DIGEST) in $0, cannot continue!"
+	exit 2
+	;;
+esac
 
 print_usage()
 {
