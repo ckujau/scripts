@@ -6,6 +6,20 @@
 #
 # TODO: Add more conversions, much more :-)
 #
+# Linkdump:
+#
+# Convert flac to (almost) anything
+# https://forums.gentoo.org/viewtopic-t-554188.html
+#
+# .ogg to .mp3
+# https://forums.gentoo.org/viewtopic-t-463068-highlight-.html
+#
+# Howto:convert aac/mp4 to wav/mp3/ogg on Linux
+# http://gimpel.gi.funpic.de/wiki/index.php/Howto:convert_aac/mp4_to_wav/mp3/ogg_on_Linux#ogg2mp3
+#
+# Convert Flac to Mp3
+# https://wiki.archlinux.org/index.php/Convert_Flac_to_Mp3
+#
 if [ ! $# -eq 2 -o ! -f "$2" ]; then
 	echo "Usage: `basename $0` [conversion] [file]"
 	echo "Conversions: flac2mp3, m4a2mp3, ogg2mp3"
