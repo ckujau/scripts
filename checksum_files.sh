@@ -42,78 +42,76 @@ esac
 
 print_usage()
 {
-	echo "Usage: `basename $0` [set]   [file1] [file2] ... [fileN]"
-	echo "       `basename $0` [get]   [file1] [file2] ... [fileN]"
-	echo "       `basename $0` [check] [file1] [file2] ... [fileN]"
+	echo "Usage: `basename $0` [set]   [file]"
+	echo "       `basename $0` [get]   [file]"
+	echo "       `basename $0` [check] [file]"
 }
 
-if [ -z "$2" ]; then
+if [ $# -ne 2 -o ! -f "$2" ]; then
 	print_usage
+	exit 1
 else
 	ACTION="$1"
-	shift 1
-	FILES="$@"
+	  FILE="$2"
 fi
 
 do_log() {
-echo "$1"
+echo "$FILE"
 
 # Continue with the next file
-[ "$2" = 1 ] && continue
+[ "$FILE" = 1 ] && continue
 }
 
-# Routines for every operating system, so we don't have to switch
-# while working on FILES
+# Routines for every operating system, as each of them handles EAs differently
 
 do_darwin() {
 # For now let's just assume that GNU coreutils are installed.
 # It's by far much faster than it's perl or openssl alternatives.
 PROGRAM=g${DIGEST}sum
 
-for f in $FILES; do
-	case $ACTION in
-		set)
-		# We don't want to store the full pathname, only the filename
-		BASENAME="`basename "$f"`"
-		cd "`dirname "$f"`" || do_log "ERROR: failed to cd into `dirname "$f"`! (FILE: $f)" 1
+case $ACTION in
+	set)
+	# We don't want to store the full pathname, only the filename
+	BASENAME="`basename "$FILE"`"
+	cd "`dirname "$FILE"`" || \
+			do_log "ERROR: failed to cd into `dirname "$FILE"`! (FILE: $FILE)" 1
 
-		xattr -w user.checksum."$DIGEST" "`$PROGRAM "$BASENAME"`" "$BASENAME" ||
-			do_log "ERROR: failed to set EA for FILE $f!" 1
+	xattr -w user.checksum."$DIGEST" "`$PROGRAM "$BASENAME"`" "$BASENAME" ||
+			do_log "ERROR: failed to set EA for FILE $FILE!" 1
 
-		# Go back to where we came from
-		cd - > /dev/null
-		;;
+	# Go back to where we came from
+	cd - > /dev/null
+	;;
 
-		get)
-		xattr -l -p user.checksum."$DIGEST" "$f" || \
-			do_log "ERROR: failed to get EA for FILE $f!" 1
-		;;
+	get)
+	xattr -l -p user.checksum."$DIGEST" "$FILE" || \
+			do_log "ERROR: failed to get EA for FILE $FILE!" 1
+	;;
 
-		check)
-		# Retrieve stored checksum
-		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$f" | cut -c-$LENGTH` || \
-			do_log "ERROR: failed to get EA for FILE $f!" 1
+	check)
+	# Retrieve stored checksum
+	CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" | cut -c-$LENGTH` || \
+			do_log "ERROR: failed to get EA for FILE $FILE!" 1
 
-		# Calculate current checksum
-		CHECKSUM_C=`$PROGRAM "$f" | cut -c-$LENGTH` || \
-			do_log "ERROR: failed to calculate checksum for FILE $f!" 1
+	# Calculate current checksum
+	CHECKSUM_C=`$PROGRAM "$FILE" | cut -c-$LENGTH` || \
+			do_log "ERROR: failed to calculate checksum for FILE $FILE!" 1
 
-		# Let's compare these two
-		if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
-			printf "FILE: $f - OK"
-			[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
-		else
-			printf "FILE: $f - FAILED"
-			[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
-		fi
-		;;
-	
-		*)
-		print_usage
-		exit 1
-		;;
-	esac
-done
+	# Let's compare these two
+	if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
+		printf "FILE: $FILE - OK"
+		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+	else
+		printf "FILE: $FILE - FAILED"
+		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+	fi
+	;;
+
+	*)
+	print_usage
+	exit 1
+	;;
+esac
 }
 
 do_freebsd() {
@@ -125,54 +123,53 @@ do_linux() {
 # faster than it's perl or openssl alternatives.
 PROGRAM=${DIGEST}sum
 
-for f in $FILES; do
-	case $ACTION in
-		set)
-		# We don't want to store the full pathname, only the filename
-		BASENAME="`basename "$f"`"
-		cd "`dirname "$f"`" || do_log "ERROR: failed to cd into `dirname "$f"`! (FILE: $f)" 1
+case $ACTION in
+	set)
+	# We don't want to store the full pathname, only the filename
+	BASENAME="`basename "$FILE"`"
+	cd "`dirname "$FILE"`" || \
+			do_log "ERROR: failed to cd into `dirname "$FILE"`! (FILE: $FILE)" 1
 
-		setfattr --name user.checksum."$DIGEST" --value "`$PROGRAM "$BASENAME"`" "$BASENAME" || \
-			do_log "ERROR: failed to set EA for FILE $f!" 1
+	setfattr --name user.checksum."$DIGEST" --value "`$PROGRAM "$BASENAME"`" "$BASENAME" || \
+			do_log "ERROR: failed to set EA for FILE $FILE!" 1
 
-		# Go back to where we came from
-		cd - > /dev/null
-		;;
+	# Go back to where we came from
+	cd - > /dev/null
+	;;
 
-		get)
-		# NOTE: If the designated EA is not set, getfattr may not return a non-exit code. This
-		# has been fixed upstream but may not have been picked up by your distribution.
-		# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=520659
-		# https://bugzilla.redhat.com/show_bug.cgi?id=660619
-		getfattr --absolute-names --name user.checksum."$DIGEST" "$f" || \
-			do_log "ERROR: failed to get EA for FILE $f!" 1
-		;;
+	get)
+	# NOTE: If the designated EA is not set, getfattr may not return a non-exit code. This
+	# has been fixed upstream but may not have been picked up by your distribution.
+	# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=520659
+	# https://bugzilla.redhat.com/show_bug.cgi?id=660619
+	getfattr --absolute-names --name user.checksum."$DIGEST" "$FILE" || \
+			do_log "ERROR: failed to get EA for FILE $FILE!" 1
+	;;
 
-		check)
-		# Retrieve stored checksum
-		CHECKSUM_S=`getfattr --absolute-names --only-values --name user.checksum."$DIGEST" "$f" | cut -c-$LENGTH` || \
-			do_log "ERROR: failed to get EA for FILE $f!" 1
+	check)
+	# Retrieve stored checksum
+	CHECKSUM_S=`getfattr --absolute-names --only-values --name user.checksum."$DIGEST" "$FILE" | cut -c-$LENGTH` || \
+			do_log "ERROR: failed to get EA for FILE $FILE!" 1
 
-		# Calculate current checksum
-		CHECKSUM_C=`$PROGRAM "$f" | cut -c-$LENGTH` || \
-			do_log "ERROR: failed to calculate checksum for FILE $f!" 1
+	# Calculate current checksum
+	CHECKSUM_C=`$PROGRAM "$FILE" | cut -c-$LENGTH` || \
+			do_log "ERROR: failed to calculate checksum for FILE $FILE!" 1
 
-		# Let's compare these two
-		if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
-			printf "FILE: $f - OK"
-			[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
-		else
-			printf "FILE: $f - FAILED"
-			[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
-		fi
-		;;
+	# Let's compare these two
+	if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
+		printf "FILE: $FILE - OK"
+		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+	else
+		printf "FILE: $FILE - FAILED"
+		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+	fi
+	;;
 	
-		*)
-		print_usage
-		exit 1
-		;;
-	esac
-done
+	*)
+	print_usage
+	exit 1
+	;;
+esac
 }
 
 do_solaris() {
