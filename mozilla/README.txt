@@ -20,7 +20,8 @@ Windows: %ProgramFiles%\Mozilla Firefox\defaults\pref\
 
 This file should have the following content:
 
-  pref("general.config.obscure_value", 0);          // Do not obscure the content with ROT-13
+  // Do not obscure the content with ROT-13
+  pref("general.config.obscure_value", 0);
   pref("general.config.filename", "firefox.cfg");
 
 The filename must be location where the actual Mozilla binary is located:
