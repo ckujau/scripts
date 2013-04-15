@@ -1,6 +1,4 @@
-
- user.js
- The "user.js" file can be set on a per-user or per-site level.
+Mozilla default settings
 
 == Per-user ==
 
