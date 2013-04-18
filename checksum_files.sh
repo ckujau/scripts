@@ -8,10 +8,10 @@
 # Set DEBUG=1 to get more verbose output
 #
 # == Requirements ==
-#  Darwin: GNU/coreutils
+#  Darwin: gsha256sum from GNU/coreutils
 # FreeBSD: /sbin/sha256
-#   Linux: GNU/coreutils
-# Solaris: /usr/bin/digest from SUNWcsu
+#   Linux: sha256sum from GNU/coreutils
+# Solaris: digest, runat from SUNWcsu
 #
 # === Notes ===
 # We could use "shasum", which lets us choose the (SHA based) digest. However,
@@ -58,8 +58,10 @@ if [ $# -ne 2 -o ! -f "$2" ]; then
 	print_usage
 	exit 1
 else
-	ACTION="$1"
-	  FILE="$2"
+	  ACTION="$1"
+	    FILE="$2"
+	# When setting EAs, we don't want to store the full pathname, only the filename
+	BASENAME="`basename "$FILE"`"
 fi
 
 # Print, exit if necessary
@@ -77,8 +79,6 @@ PROGRAM=g${DIGEST}sum
 
 case $ACTION in
 	set)
-	# We don't want to store the full pathname, only the filename
-	BASENAME="`basename "$FILE"`"
 	cd "`dirname "$FILE"`" || \
 			do_log "ERROR: failed to cd into `dirname "$FILE"`! (FILE: $FILE)" 1
 
@@ -145,8 +145,6 @@ PROGRAM=${DIGEST}sum
 
 case $ACTION in
 	set)
-	# We don't want to store the full pathname, only the filename
-	BASENAME="`basename "$FILE"`"
 	cd "`dirname "$FILE"`" || \
 			do_log "ERROR: failed to cd into `dirname "$FILE"`! (FILE: $FILE)" 1
 
@@ -207,10 +205,57 @@ esac
 }
 
 do_solaris() {
-	echo TBD
+PROGRAM="digest -a $DIGEST"
+
+case $ACTION in
+	get)
+	runat "$FILE" cat user.checksum."$DIGEST" || \
+			do_log "ERROR: failed to get EA for FILE $FILE!" 1
+	;;
+
+	set)
+	cd "`dirname "$FILE"`" || \
+		do_log "ERROR: failed to cd into `dirname "$FILE"`! (FILE: $FILE)" 1
+
+	echo "Setting user.checksum."$DIGEST" on "$FILE"..."
+	runat "$FILE" "echo \"`$PROGRAM "$FILE"` "$BASENAME"\" > user.checksum.sha256" || \
+		do_log "ERROR: failed to set EA for FILE $FILE!" 1
+	;;
+
+	check-set)
+	CHECKSUM_S=`runat "$FILE" cat user.checksum."$DIGEST" 2>/dev/null`
+	if [ -z "$CHECKSUM_S" ]; then
+		# No checksum found
+		"$0" set "$FILE"
+	else
+		# Checksum found
+		do_log "INFO: checksum found for $FILE, not setting a new checksum."
+	fi
+	;;
+
+	check)
+	# Retrieve stored checksum
+	CHECKSUM_S=`runat "$FILE" cat user.checksum."$DIGEST" | awk '{print $1}'`
+	[ -z "$CHECKSUM_S" ] && do_log "ERROR: failed to get EA for FILE $FILE!" 1
+
+	# Calculate current checksum
+	CHECKSUM_C=`$PROGRAM "$FILE"` || \
+		do_log "ERROR: failed to calculate checksum for FILE $FILE!" 1
+
+	# Let's compare these two
+	if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
+		printf "FILE: $FILE - OK"
+		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+	else
+		printf "FILE: $FILE - FAILED"
+		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+	fi
+
+	;;
+esac
 }
 
-case $(uname -s) in
+case `uname -s` in
 	Darwin)
 	do_darwin
 	;;
