@@ -42,9 +42,10 @@ esac
 
 print_usage()
 {
-	echo "Usage: `basename $0` [set]   [file]"
-	echo "       `basename $0` [get]   [file]"
-	echo "       `basename $0` [check] [file]"
+	echo "Usage: `basename $0` [get]       [file]"
+	echo "       `basename $0` [set]       [file]"
+	echo "       `basename $0` [check-set] [file]"
+	echo "       `basename $0` [check]     [file]"
 }
 
 if [ $# -ne 2 -o ! -f "$2" ]; then
@@ -81,6 +82,17 @@ case $ACTION in
 
 	# Go back to where we came from
 	cd - > /dev/null
+	;;
+
+	check-set)
+	CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null | cut -c-$LENGTH`
+	if [ -z "$CHECKSUM_S" ]; then
+		# No checksum found
+		"$0" set "$FILE"
+	else
+		# Checksum found
+		do_log "INFO: checksum found for $FILE, not setting a new checksum."
+	fi
 	;;
 
 	get)
@@ -138,6 +150,17 @@ case $ACTION in
 
 	# Go back to where we came from
 	cd - > /dev/null
+	;;
+
+	check-set)
+	CHECKSUM_S=`getfattr --absolute-names --name user.checksum."$DIGEST" "$FILE" 2>/dev/null | cut -c-$LENGTH`
+	if [ -z "$CHECKSUM_S" ]; then
+		# No checksum found
+		"$0" set "$FILE"
+	else
+		# Checksum found
+		do_log "INFO: checksum found for $FILE, not setting a new checksum."
+	fi
 	;;
 
 	get)
