@@ -7,6 +7,12 @@
 #
 # Set DEBUG=1 to get more verbose output
 #
+# == Requirements ==
+#  Darwin: GNU/coreutils
+# FreeBSD: /sbin/sha256
+#   Linux: GNU/coreutils
+# Solaris: /usr/bin/digest from SUNWcsu
+#
 # === Notes ===
 # We could use "shasum", which lets us choose the (SHA based) digest. However,
 # "shasum" is a Perl script and preliminary tests have shown that it's
@@ -66,7 +72,7 @@ echo "$1"
 
 do_darwin() {
 # For now let's just assume that GNU coreutils are installed.
-# It's by far much faster than it's perl or openssl alternatives.
+# It's by far much faster than its perl or openssl alternatives.
 PROGRAM=g${DIGEST}sum
 
 case $ACTION in
@@ -134,7 +140,7 @@ do_freebsd() {
 
 do_linux() {
 # GNU coreutils will be installed on most Linux distributions. It's also by far much
-# faster than it's perl or openssl alternatives.
+# faster than its perl or openssl alternatives.
 PROGRAM=${DIGEST}sum
 
 case $ACTION in
