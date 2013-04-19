@@ -30,20 +30,6 @@ DIGEST="sha256"			# sha1, sha224, sha256, sha384, sha512
 # Adjust if needed
 PATH=/bin:/usr/bin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
 
-# We'll need the length of our DIGEST later on. Instead of (laboriously)
-# trying to find this out ourselves, let's just hardcode those values.
-case $DIGEST in
-	  sha1) LENGTH=40 ;;
-	sha224) LENGTH=56 ;; 
-	sha256) LENGTH=64 ;; 
-	sha384) LENGTH=96 ;; 
-	sha512)	LENGTH=128 ;;
-	*)
-	echo "ERROR: Unknown DIGEST ($DIGEST) in $0, cannot continue!"
-	exit 2
-	;;
-esac
-
 print_usage()
 {
 	echo "Usage: `basename $0` [get]       [file]"
@@ -92,7 +78,7 @@ case "$OS" in
 	FreeBSD)
 	# FreeBSD doesn't have a lot of options though. Our default (sha256)
 	# should be available.
-	PROGRAM="$DIGEST"
+	PROGRAM="$DIGEST -q"
 	;;
 
 	*)
@@ -163,14 +149,14 @@ case $ACTION in
 	check-set)
 	case "$OS" in
 		Darwin)
-		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null | cut -c-$LENGTH`
+		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '{print $1}'`
 		;;
 
 		FreeBSD)
 		;;
 
 		Linux)
-		CHECKSUM_S=`getfattr --absolute-names --name user.checksum."$DIGEST" "$FILE" 2>/dev/null | cut -c-$LENGTH`
+		CHECKSUM_S=`getfattr --absolute-names --name user.checksum."$DIGEST" --only-values "$FILE" | awk '{print $1}'`
 		;;
 
 		SunOS)
@@ -193,14 +179,14 @@ case $ACTION in
 	case "$OS" in
 		Darwin)
 		# Retrieve stored checksum
-		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null | cut -c-$LENGTH`
+		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '{print $1}'`
 		;;
 
 		FreeBSD)
 		;;
 
 		Linux)
-		CHECKSUM_S=`getfattr --absolute-names --only-values --name user.checksum."$DIGEST" "$FILE" | cut -c-$LENGTH`
+		CHECKSUM_S=`getfattr --absolute-names --name user.checksum."$DIGEST" --only-values "$FILE" | awk '{print $1}'`
 		;;
 
 		SunOS)
@@ -212,7 +198,7 @@ case $ACTION in
 	[ -z "$CHECKSUM_S" ] && do_log "ERROR: failed to get EA for FILE $FILE!" 1
 
 	# Calculate current checksum
-	CHECKSUM_C=`$PROGRAM "$FILE" | cut -c-$LENGTH` || \
+	CHECKSUM_C=`$PROGRAM "$FILE" | awk '{print $1}'` || \
 		do_log "ERROR: failed to calculate checksum for FILE $FILE!" 1
 
 	# Let's compare these two. Set DEBUG=1 to get more verbose output.
