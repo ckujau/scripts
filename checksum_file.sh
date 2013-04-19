@@ -116,6 +116,7 @@ case $ACTION in
 
 ####### SET
 	set)
+	CWD=`pwd`
 	cd "`dirname "$FILE"`" || \
 		do_log "ERROR: failed to cd into `dirname "$FILE"`! (FILE: $FILE)" 1
 
@@ -142,7 +143,7 @@ case $ACTION in
 	[ $? = 0 ] || do_log "ERROR: failed to set EA for FILE $FILE!" 1
 
 	# Go back to where we came from
-	cd - > /dev/null
+	cd "$CWD"
 	;;
 
 ####### CHECK-SET
