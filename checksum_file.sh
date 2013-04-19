@@ -50,6 +50,7 @@ print_usage()
 	echo "       `basename $0` [set]       [file]"
 	echo "       `basename $0` [check-set] [file]"
 	echo "       `basename $0` [check]     [file]"
+	echo "       `basename $0` [remove]    [file]"
 }
 
 if [ $# -ne 2 -o ! -f "$2" ]; then
@@ -222,6 +223,25 @@ case $ACTION in
 		printf "FILE: $FILE - FAILED"
 		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
 	fi
+	;;
+
+	remove)
+	case "$OS" in
+		Darwin)
+		xattr -d user.checksum."$DIGEST" "$FILE"
+		;;
+
+		FreeBSD)
+		;;
+
+		Linux)
+		setfattr --remove user.checksum."$DIGEST" "$FILE"
+		;;
+
+		SunOS)
+		runat "$FILE" rm user.checksum."$DIGEST"
+		;;
+	esac
 	;;
 
 	*)
