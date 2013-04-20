@@ -47,7 +47,7 @@ else
 	    FILE="$2"
 	# When setting EAs, we don't want to store the full pathname, only the filename
 	BASENAME="`basename "$FILE"`"
-		  OS="`uname -s`"
+	  OS="`uname -s`"
 fi
 
 # Print, exit if necessary
@@ -76,13 +76,13 @@ case "$OS" in
 	;;
 
 	FreeBSD)
-	# FreeBSD doesn't have a lot of options though. Our default (sha256)
-	# should be available.
+	# FreeBSD doesn't have a lot of options. Our default (sha256) should be
+	# available though.
 	PROGRAM="$DIGEST -q"
 	;;
 
 	*)
-	do_log "We don't support $(uname -s), yet :-(" 1
+	do_log "We don't support "$OS", yet :-(" 1
 esac
 
 # Main routines, with switches for each OS
