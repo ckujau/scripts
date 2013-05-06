@@ -102,7 +102,7 @@ case $ACTION in
 		# has been fixed upstream but may not have been picked up by your distribution.
 		# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=520659
 		# https://bugzilla.redhat.com/show_bug.cgi?id=660619
-		getfattr --absolute-names --name user.checksum."$DIGEST" "$FILE"
+		getfattr --absolute-names --name user.checksum."$DIGEST" "$FILE" | grep "^user.checksum"
 		;;
 
 		SunOS)
