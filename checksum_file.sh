@@ -98,8 +98,9 @@ case $ACTION in
 		;;
 
 		Linux)
-		# NOTE: If the designated EA is not set, getfattr may not return a non-exit code. This
-		# has been fixed upstream but may not have been picked up by your distribution.
+		# NOTE: If the designated EA is not set, getfattr may not return a non-zero
+		# exit code. This has been fixed upstream but may not have been picked up
+		# by your distribution.
 		# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=520659
 		# https://bugzilla.redhat.com/show_bug.cgi?id=660619
 		getfattr --absolute-names --name user.checksum."$DIGEST" "$FILE" | grep "^user.checksum"
