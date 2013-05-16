@@ -11,7 +11,8 @@ set nohlsearch			" Don't highlight search results
 set nolist			" Don't show tabs
 set nonumber			" Don't show line numbers
 set t_ti= t_te=			" Don't blank on exit
-; set tabstop=4			" Number of spaces for <Tab>
+" set tabstop=4			" Number of spaces for <Tab>
+" set shiftwidth=4		" Number of spaces (auto)indent
 
 " Syntax highlighting
 if has("syntax")
