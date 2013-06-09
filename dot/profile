@@ -15,3 +15,4 @@ if [ -n "$ZSH_VERSION" -a -f "$HOME"/.zshrc ]; then
 fi
 
 umask 0066
+unset LS_COLORS
