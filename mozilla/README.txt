@@ -2,9 +2,11 @@ Mozilla default settings
 
 == Per-user ==
 
-  Linux: ~/.mozilla/firefox/NAME/user.js
-  MacOS: ~/Library/Application Support/Firefox/Profiles/NAME/user.js
-Windows: %APPDATA%\Mozilla\Firefox\Profiles\NAME\user.js
+Place a file called "user.js" into the profile directory:
+
+  Linux: ~/.mozilla/firefox/NAME/
+  MacOS: ~/Library/Application Support/Firefox/Profiles/NAME/
+Windows: %APPDATA%\Mozilla\Firefox\Profiles\NAME\
 
 Note: values are set with "user_pref"
 
@@ -12,7 +14,7 @@ Note: values are set with "user_pref"
 
 Place a file called "local-settings.js" into the installation directory:
 
-  Linux: /usr/lib/firefox/defaults/preferences
+  Linux: /usr/lib/firefox/defaults/preferences/
   MacOS: /Applications/Firefox.app/Contents/MacOS/defaults/pref/
 Windows: %ProgramFiles%\Mozilla Firefox\defaults\pref\
 
@@ -22,10 +24,10 @@ This file should have the following content:
   pref("general.config.obscure_value", 0);
   pref("general.config.filename", "firefox.cfg");
 
-The filename must be location where the actual Mozilla binary is located:
+The "firefox.cfg" must be stored where the actual Mozilla binary is located:
 
-  Linux: /usr/lib/firefox 
-  MacOS: /Applications/Firefox.app/Contents/MacOS
+  Linux: /usr/lib/firefox/
+  MacOS: /Applications/Firefox.app/Contents/MacOS/
 Windows: %ProgramFiles%\Mozilla Firefox\
 
 Note: values can be set with "defaultPref" or "lockPref"
