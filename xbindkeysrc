@@ -1,0 +1,13 @@
+#
+# Really good Xbindkeys howto:
+# https://wiki.archlinux.org/index.php/Xbindkeys
+#
+
+# Note: sudoers needs !requiretty for this to work!
+"sudo /usr/local/sbin/keyboard-backlight.sh off"
+	m:0x0 + c:237
+	XF86KbdBrightnessDown
+
+"sudo /usr/local/sbin/keyboard-backlight.sh total"
+	m:0x0 + c:238
+	XF86KbdBrightnessUp
