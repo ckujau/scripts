@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Francisco Diéguez Souto (frandieguez@ubuntu.com)
+# Originally written by Francisco Diéguez Souto (frandieguez@ubuntu.com)
 # This script is licensed under MIT License.
 #
 # This program just modifies the value of backlight keyboard for Apple Laptops
