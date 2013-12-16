@@ -14,7 +14,7 @@ Note: values are set with "user_pref"
 
 Place a file called "local-settings.js" into the installation directory:
 
-  Linux: /usr/lib/firefox/defaults/preferences/
+  Linux: /usr/lib{,64}/firefox/browser/defaults/preferences/
   MacOS: /Applications/Firefox.app/Contents/MacOS/defaults/pref/
 Windows: %ProgramFiles%\Mozilla Firefox\defaults\pref\
 
@@ -26,7 +26,7 @@ This file should have the following content:
 
 The "firefox.cfg" must be stored where the actual Mozilla binary is located:
 
-  Linux: /usr/lib/firefox/
+  Linux: /usr/lib{,64}/firefox/
   MacOS: /Applications/Firefox.app/Contents/MacOS/
 Windows: %ProgramFiles%\Mozilla Firefox\
 
