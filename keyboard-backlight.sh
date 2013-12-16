@@ -1,5 +1,5 @@
-#!/bin/bash
-
+#!/bin/sh
+#
 # Francisco Diéguez Souto (frandieguez@ubuntu.com)
 # This script is licensed under MIT License.
 #
@@ -8,70 +8,82 @@
 # As a shortcut you could allow to admin users to run via sudo without password
 # prompt. To do this you must add sudoers file the next contents:
 #
-#  Cmnd_Alias CMDS = /usr/local/bin/keyboard-backlight
+#  Cmnd_Alias CMDS = /usr/local/bin/keyboard-backlight.sh
 #  %admin ALL = (ALL) NOPASSWD: CMDS
 #
 # After this you can use this script as follows:
 #
 #     Increase backlight keyboard:
-#	    $ sudo keyboard-backlight up
+#	    $ sudo keyboard-backlight.sh up
 #     Decrease backlight keyboard:
-#	    $ sudo keyboard-backlight down
+#	    $ sudo keyboard-backlight.sh down
 #     Increase to total value backlight keyboard:
-#	    $ sudo keyboard-backlight total
+#	    $ sudo keyboard-backlight.sh total
 #     Turn off backlight keyboard:
-#	    $ sudo keyboard-backlight off
+#	    $ sudo keyboard-backlight.sh off
 #
 # You can customize the amount of backlight by step by changing the INCREMENT
 # variable as you want it.
+#
 
-BACKLIGHT=$(cat /sys/class/leds/smc::kbd_backlight/brightness)
-INCREMENT=15
+ BACKLIGHT="/sys/class/leds/smc::kbd_backlight/brightness"
+BRIGHTNESS=$(cat $BACKLIGHT)
+ INCREMENT=20
 
-if [ $UID -ne 0 ]; then
-    echo "Please run this program as superuser"
-    exit 1
+if [ $(id -ru) -ne 0 ]; then
+	echo "Please run this program as superuser!"
+	exit 1
 fi
 
-SET_VALUE=0
+die() {
+echo "Brightness is already $1"
+exit 1
+}
 
 case $1 in
+	up)
+	# BRIGHTNESS will be capped at 255 anyway
+	if [ $BRIGHTNESS -lt 255 ]; then
+		expr $BRIGHTNESS + $INCREMENT > $BACKLIGHT
+	else
+		die $BRIGHTNESS
+	fi
+	;;
 
-    up)
-        TOTAL=`expr $BACKLIGHT + $INCREMENT`
-        if [ $TOTAL -gt "255" ]; then
-            exit 1
-        fi
-        SET_VALUE=1
-        ;;
-    down)
-        TOTAL=`expr $BACKLIGHT - $INCREMENT`
-        if [ $TOTAL -lt "0" ]; then
-            exit 1
-        fi
-        SET_VALUE=1
-        ;;
-    total)
-	TEMP_VALUE=$BACKLIGHT
-	while [ $TEMP_VALUE -lt "255" ]; do
-		TEMP_VALUE=`expr $TEMP_VALUE + 1`
-		if [ $TEMP_VALUE -gt "255" ]; then TEMP_VALUE=255; fi
-		echo $TEMP_VALUE > /sys/class/leds/smc::kbd_backlight/brightness
-	done
-        ;;
-    off)
-	TEMP_VALUE=$BACKLIGHT
-	while [ $TEMP_VALUE -gt "0" ]; do
-		TEMP_VALUE=`expr $TEMP_VALUE - 1`
-		if [ $TEMP_VALUE -lt "0" ]; then TEMP_VALUE=0; fi
-		echo $TEMP_VALUE > /sys/class/leds/smc::kbd_backlight/brightness
-	done
-        ;;
-    *)
-        echo "Use: keyboard-light up|down|total|off"
-        ;;
+	down)
+	if [ $BRIGHTNESS -gt 0 ]; then
+		VALUE=`expr $BRIGHTNESS - $INCREMENT`
+
+		# BRIGHTNESS cannot be negative
+		[ $VALUE -lt 0 ] && VALUE=0
+		echo $VALUE > $BACKLIGHT
+	else
+		die $BRIGHTNESS
+	fi
+	;;
+
+	total)
+	echo 255 > $BACKLIGHT
+	;;
+
+	off)
+	echo 0 > $BACKLIGHT
+	;;
+
+	[\-0-9]*)
+	VALUE=$1
+	if [ $VALUE -ge 0 ] && [ $VALUE -le 255 ]; then
+		echo $VALUE > $BACKLIGHT
+	else
+		echo "Invalid argument ($VALUE). Please provide a value from 0 to 255!"
+		exit 1
+	fi
+	;;
+
+	*)
+		echo "Use: `basename $0` [up|down|total|off|value]"
+		exit 1
+	;;
 esac
 
-if [ $SET_VALUE -eq "1" ]; then
-    echo $TOTAL > /sys/class/leds/smc::kbd_backlight/brightness
-fi
+echo "Brightness set to $(cat $BACKLIGHT)"
