@@ -6,8 +6,8 @@
  */
 $ip1 = $_SERVER['REMOTE_ADDR'];
 
-// Call with plain=1 to get just the IP address
-if (isset($_GET['plain']) && $_GET['plain'] == "1") {
+// Call with "plain" to get just the IP address
+if (isset($_GET['plain']) || $_GET['plain'] == "1") {
 	echo "$ip1";
 	exit;
 } else {
@@ -24,6 +24,10 @@ echo "<?xml version=\"1.0\"?>
 <head>
 	<title></title>
 	<meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\" />
+	<meta http-equiv=\"refresh\" content=\"60\" />
+	<meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" />
+	<meta http-equiv=\"Pragma\" content=\"no-cache\" />
+	<meta http-equiv=\"Expires\" content=\"0\" /
 </head>
 <body>
 <table summary=\"IPv4\" border=\"1\">
