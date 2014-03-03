@@ -30,7 +30,11 @@ The "firefox.cfg" must be stored where the actual Mozilla binary is located:
   MacOS: /Applications/Firefox.app/Contents/MacOS/
 Windows: %ProgramFiles%\Mozilla Firefox\
 
-Note: values can be set with "defaultPref" or "lockPref"
+Notes:
+* Values in "firefox.cfg" can be set with "defaultPref" or "lockPref"
+* In Debian, Firefox is called "Iceweasel" and its defaults are stored
+  elsewhere: both local-settings.js and firefox.cfg can reside in 
+  /etc/iceweasel/pref, but the latter needs to be symlinked to /usr/lib/iceweasel
 
 == Links ==
 
