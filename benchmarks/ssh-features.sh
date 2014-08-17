@@ -1,0 +1,51 @@
+#!/bin/sh
+#
+# (c)2014 Christian Kujau <lists@nerdbynature.de>
+#
+# SSH ciphers, MACs, key exchange algorithms
+# http://security.stackexchange.com/questions/25662/openssh-default-preferred-ciphers-hash-etc-for-ssh2
+#
+# Run with:
+# ./ssh-features.sh dummy@host0 2>&1 | tee ssh-eval.log
+#
+# Generate performance stats ssh-performance.sh later on.
+#
+
+# Find out which ciphers are supported in _our_ version. And we do this by looking up its manpage...is
+# there really no other way? (Apart from running strings(1) on the SSH binary)
+CIPHERS=$(man ssh_config | grep -A5 aes128-ctr, | fgrep , | xargs echo | sed 's/,/ /g')
+MACS=$(man ssh_config | grep -A15 MACs | grep \ \ [hu]mac | xargs echo | sed 's/,/ /g')
+KEX=$(man ssh_config | grep -A10 KexAlgorithms | egrep '(ecdh|diffie|curve)' | xargs echo | sed 's/,/ /g')
+
+ssh -V 2>&1 | cat
+
+echo "Ciphers (`echo $CIPHERS | wc -w`):"
+echo $CIPHERS
+echo
+
+echo "MACs (`echo $MACS | wc -w`):"
+echo $MACS
+echo
+
+echo "KexAlgorithms (`echo $KEX | wc -w`):"
+echo $KEX
+echo
+
+if [ -z "$1" ]; then
+	echo "Usage: $0 [user@][host]"
+	exit 1
+else
+	host="$1"
+fi
+
+ssh -v "$host" true 2>&1 | egrep 'Local version|Remote proto'
+echo
+for c in $CIPHERS; do
+	for m in $MACS; do
+		for k in $KEX; do
+			printf "cipher: $c mac: $m kex: $k   "
+			ssh -o Ciphers="$c" -o MACs="$m" -o KexAlgorithms="$k" "$host" true 2>/dev/null
+			echo "exit: $?"
+		done
+	done
+done
