@@ -1,6 +1,10 @@
 #!/bin/sh
 #
+# (c)2014 Christian Kujau <lists@nerdbynature.de>
 # Test various password generators and password checkers
+#
+# Needs the following programs installed:
+# cracklib-runtime, passwdqc, pwgen, apg, gpw, makepasswd, openssl, GNU/parallel
 #
 
 # Number of passwords required
@@ -14,7 +18,7 @@ fi
 
 stats() {
 # arguments: FAILED, NUM, TYPE, TIME_E, TIME_S
-echo "$FAILED passwords ($(echo "scale=3; $FAILED / $NUM * 100" | bc -l)%) failed for $c, runtime: $(expr $TIME_E - $TIME_S) seconds."
+echo "$FAILED passwords ($(echo "scale=2; $FAILED / $NUM * 100" | bc -l)%) failed for $c, runtime: $(expr $TIME_E - $TIME_S) seconds."
 }
 
 # Password checkers
@@ -49,10 +53,14 @@ r_makepasswd() {
 makepasswd --chars=$LEN --count=$NUM
 }
 
+r_openssl() {
+yes openssl rand -base64 16 | head -"$NUM" | parallel | cut -c-"$LEN"
+}
+
 # main loop
 for c in cracklib pwqcheck; do
-	for g in pwgen pwqgen apg gpw makepasswd; do
-		printf "$g - "
+	for g in pwgen pwqgen apg gpw makepasswd openssl; do
+		printf "%10s - %s" $g
 		TIME_S=$(date +%s)
 		FAILED=$(r_$g | r_$c)
 		TIME_E=$(date +%s)
