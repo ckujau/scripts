@@ -19,6 +19,11 @@ else
 	if [ $LEN -gt 22 ]; then
 		echo "WARNING: \"length\" is greater than 22, results for pwqgen may not be correct!"
 	fi
+	
+	# See the comment for r_openssl below
+	if [ $LEN -gt 64 ]; then
+		echo "WARNING: \"length\" is greater than 64, results for openssl may not be correct!"
+	fi
 fi
 
 stats() {
@@ -77,7 +82,17 @@ makepasswd --chars=$LEN --count=$NUM
 }
 
 r_openssl() {
-yes openssl rand -base64 16 | head -"$NUM" | parallel | cut -c-"$LEN"
+#
+# While openssl(1) is not strictly a password generator, it can emit (pseudo-)random
+# strings of text. But, as pwqgen above, it has the same limitation: it generates only
+# one certain number of random bytes of unspecified length. We're using base64 encoding
+# here, to generate printable text - but this means that the last (two) characters are
+# two equal signs ("=="). Using -hex would limit our charset too much though. Also,
+# since we're reading line-by-line, we have an upper limit of 64 characters.
+#
+for a in $(seq 1 $NUM); do
+	openssl rand -base64 64 | head -1
+done | sed 's/.=$//' | cut -c-"$LEN"
 }
 
 # main loop
