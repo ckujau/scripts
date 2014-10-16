@@ -7,13 +7,23 @@
 # cracklib-runtime, passwdqc, pwgen, apg, gpw, makepasswd, openssl, GNU/parallel
 #
 
-# Number of passwords required
+# Password length and number of passwords required
 if [ -z "$1" ]; then
-	echo "Usage: $(basename $0) [lenth] [num]"
+	echo "Usage: $(basename $0) [length] [num]"
 	exit 1
 else
 	LEN="$1"
 	NUM="$2"
+
+	# See the comment for r_pwqgen below
+	if [ $LEN -gt 22 ]; then
+		echo "WARNING: \"length\" is greater than 22, results for pwqgen may not be correct!"
+	fi
+	
+	# See the comment for r_openssl below
+	if [ $LEN -gt 64 ]; then
+		echo "WARNING: \"length\" is greater than 64, results for openssl may not be correct!"
+	fi
 fi
 
 stats() {
@@ -35,10 +45,28 @@ r_pwgen() {
 pwgen -s -1 $LEN $NUM
 }
 
+#
+# OK, pwqgen is somewhat special: while all other programs can generate (a
+# certain number of) passwords of a certain length, pwqgen generates only one
+# password of certain randomness (in bits). With random=85 (the highest
+# setting), we're only guaranteed to get a password of at least 22 characters:
+# $ for a in {1..10000}; do pwqgen random=85; done | awk '{print length}' | sort -n | head -1
+# => 22
+#
+# The absolute maximum length seems to be 35 characters:
+# $ for a in {1..10000}; do pwqgen random=85; done | awk '{print length}' | sort -n | tail -1
+# => 35
+#
 r_pwqgen() {
-i=0; while [ $i -lt $NUM ]; do
-	pwqgen | cut -c-"$LEN" | egrep -o "^.{$LEN}$" && i=$((i+1))
-done
+# The following is good enough for passwords of length 22 characters and below:
+for a in $(seq 1 $NUM); do
+	pwqgen random=85
+done | cut -c-"$LEN" | egrep -o "^.{$LEN}$"
+
+# The following would be the correct solution, but also takes much longer:
+# i=0; while [ $i -lt $NUM ]; do
+#	pwqgen random=85 | cut -c-"$LEN" | egrep -o "^.{$LEN}$" && i=$((i+1))
+# done
 }
 
 r_apg() {
@@ -54,7 +82,17 @@ makepasswd --chars=$LEN --count=$NUM
 }
 
 r_openssl() {
-yes openssl rand -base64 16 | head -"$NUM" | parallel | cut -c-"$LEN"
+#
+# While openssl(1) is not strictly a password generator, it can emit (pseudo-)random
+# strings of text. But, as pwqgen above, it has the same limitation: it generates only
+# one certain number of random bytes of unspecified length. We're using base64 encoding
+# here, to generate printable text - but this means that the last (two) characters are
+# two equal signs ("=="). Using -hex would limit our charset too much though. Also,
+# since we're reading line-by-line, we have an upper limit of 64 characters.
+#
+for a in $(seq 1 $NUM); do
+	openssl rand -base64 64 | head -1
+done | sed 's/.=$//' | cut -c-"$LEN"
 }
 
 # main loop
