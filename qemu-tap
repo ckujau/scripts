@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 #
 # Based on:
 # https://superuser.com/questions/596095/how-do-i-bridge-a-connection-from-wi-fi-to-tap-on-mac-os-x-for-the-emulator-qe
@@ -10,7 +10,6 @@ INTERFACE=en1
 DEBUG=sudo
 
 # See how we were called
-
 case $(basename $0) in
 	qemu-ifup)
 	# Needed for the symlink
