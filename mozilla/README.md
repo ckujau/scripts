@@ -18,7 +18,7 @@ Place a file called `local-settings.js` into the [installation directory](http:/
 ```
  Linux: /usr/lib{,64}/firefox/browser/defaults/preferences/
  MacOS: /Applications/Firefox.app/Contents/Resources/defaults/    => Firefox 34+
-	/Applications/Firefox.app/Contents/MacOS/defaults/pref/   => until Firefox 33.x
+        /Applications/Firefox.app/Contents/MacOS/defaults/pref/   => until Firefox 33.x
 Windows: %ProgramFiles%\Mozilla Firefox\defaults\pref\
 ```
 
