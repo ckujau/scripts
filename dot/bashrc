@@ -10,13 +10,13 @@ else
 fi
 
 export PROMPT_COMMAND='history -a'
-export TERM=xterm-color
+export TERM=xterm
 export HISTTIMEFORMAT='%F %T '
 export HISTSIZE=10000
 export HISTCONTROL="ignoredups:ignorespace"
 export GREP_OPTIONS='--color=tty --devices=skip'
 export PAGER='less'
-export LESS='--ignore-case --squeeze-blank-lines --no-init'
+export LESS='--ignore-case --squeeze-blank-lines --no-init --RAW-CONTROL-CHARS'
 export EDITOR=vi
 
 alias mv='mv -i'
@@ -29,6 +29,4 @@ fi
 
 if [ -z "$BASH_COMPLETION" ]; then
 	[ -f /etc/bash_completion ] && . /etc/bash_completion
-	[ -f /opt/local/etc/bash_completion ] && . /opt/local/etc/bash_completion
 fi
-
