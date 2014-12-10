@@ -1,7 +1,9 @@
 #!/bin/sh
 #
 # (C)2013, lists@nerdbynature.de
-# dm-crypt tester
+#
+# Test different cipher, mode and hash combinations. The output can be
+# used by cryptsetup_benchmark.sh later on.
 #
 
 # DEBUG=echo
