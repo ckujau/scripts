@@ -38,7 +38,7 @@ IFS='
 # The -r option keeps the backslash from being an escape char.
 read -r s
 
-while [[ $? -eq 0 ]]; do
+while [ $? -eq 0 ]; do
 	# Get beginning of line to determine what type of diff line it is.
 	t1=${s:0:1}
 	t2=${s:0:2}
@@ -47,26 +47,26 @@ while [[ $? -eq 0 ]]; do
 	t7=${s:0:7}
 
 	# Determine HTML class to use.
-	if    [[ "$t7" == 'Only in' ]]; then
+	if    [ "$t7" = 'Only in' ]; then
 		cls='only'
 
-		if [[ $diffseen -eq 0 ]]; then
+		if [ $diffseen -eq 0 ]; then
 			diffseen=1
 			echo -n '</span>'
 		else
-			if [[ $lastonly -eq 0 ]]; then
+			if [ $lastonly -eq 0 ]; then
 				echo "</div>"
 			fi
 		fi
 
-		if [[ $lastonly -eq 0 ]]; then
+		if [ $lastonly -eq 0 ]; then
 			echo "<div class='diffdiv'>"
 		fi
 		lastonly=1
 
-	elif [[ "$t4" == 'diff' ]]; then
+	elif [ "$t4" = 'diff' ]; then
 		cls='diff'
-		if [[ $diffseen -eq 0 ]]; then
+		if [ $diffseen -eq 0 ]; then
 			diffseen=1
 			echo -n '</span>'
 		else
@@ -76,23 +76,23 @@ while [[ $? -eq 0 ]]; do
 		echo "<div class='diffdiv'>"
 		lastonly=0
 
-	elif  [[ "$t3" == '+++'  ]]; then
+	elif  [ "$t3" = '+++'  ]; then
 		cls='plus3'
 		lastonly=0
 
-	elif  [[ "$t3" == '---'  ]]; then
+	elif  [ "$t3" = '---'  ]; then
 		cls='minus3'
 		lastonly=0
 
-	elif  [[ "$t2" == '@@'   ]]; then
+	elif  [ "$t2" = '@@'   ]; then
 		cls='at2'
 		lastonly=0
 
-	elif  [[ "$t1" == '+'    ]]; then
+	elif  [ "$t1" = '+'    ]; then
 		cls='plus'
 		lastonly=0
 
-	elif  [[ "$t1" == '-'    ]]; then
+	elif  [ "$t1" = '-'    ]; then
 		cls='minus'
 		lastonly=0
 
@@ -103,14 +103,14 @@ while [[ $? -eq 0 ]]; do
 
 	# Convert &, <, > to HTML entities.
 	s=$(sed -e 's/\&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' <<<"$s")
-	if [[ $first -eq 1 ]]; then
+	if [ $first -eq 1 ]; then
 		first=0
 	else
 		echo
 	fi
 
 	# Output the line.
-	if [[ "$cls" ]]; then
+	if [ "$cls" ]; then
 		echo -n '<span class="'${cls}'">'${s}'</span>'
 	else
 		echo -n ${s}
@@ -119,7 +119,7 @@ while [[ $? -eq 0 ]]; do
 done
 IFS=$OIFS
 
-if [[ $diffseen -eq 0  &&  $onlyseen -eq 0 ]]; then 
+if [ $diffseen -eq 0  &&  $onlyseen -eq 0 ]; then 
 	echo -n '</span>'
 else
 	echo "</div>"
