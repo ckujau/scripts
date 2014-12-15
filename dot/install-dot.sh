@@ -3,12 +3,13 @@
 # Install dot files to the current working directory
 #
 
-# curl? wget?
-[ `which curl` ] && PROG="curl --insecure --output"
-[ `which wget` ] && PROG="wget --no-check-certificate --output-document"
+# curl? wget? fetch?
+[ `which curl` ]  && PROG="curl --insecure --output"
+[ `which wget` ]  && PROG="wget --no-check-certificate --output-document"
+[ `which fetch` ] && PROG="fetch --no-verify-peer --output"
 
 if [ -z "$PROG" ]; then
-	echo "No download program found. Install \"curl\" or \"wget\" and try again!"
+	echo "No download program found. Install \"curl\", \"wget\" or \"fetch\" and try again!"
 	exit 1
 else
 	for f in bashrc kshrc profile screenrc tmux.conf vimrc wgetrc; do
