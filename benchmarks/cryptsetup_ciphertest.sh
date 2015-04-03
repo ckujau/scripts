@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # (C)2013, lists@nerdbynature.de
+<<<<<<< HEAD
 # Create dm-crypt devices with different combinations of ciphers, modes, hash
 # alorithms and key sizes.
 #
@@ -19,6 +20,11 @@
 #
 # $ find /lib/modules/$(uname -r)/ -type f -path "*kernel/crypto*" -printf "%f\n" \
 #      | sed 's/\.ko$//' | while read a; do modprobe -v $a; done
+=======
+#
+# Test different cipher, mode and hash combinations. The output can be
+# used by cryptsetup_benchmark.sh later on.
+>>>>>>> 26eb66da4963b20b77f74384716447dfbcb3e5dc
 #
 
 # unset me!

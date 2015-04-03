@@ -1,5 +1,0 @@
-If you like those, try:
-
-for f in bashrc kshrc profile screenrc tmux.conf vimrc wgetrc; do
-	curl https://raw.githubusercontent.com/ckujau/scripts/master/dot/$f -o .$f
-done

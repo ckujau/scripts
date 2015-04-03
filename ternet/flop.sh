@@ -1,7 +1,8 @@
 #!/bin/bash
 #
 # (C) Mule, 2009-08-07
-# http://breakingsystemsforfunandprofit.com/archives/118
+# The Lolcats, they are everywhere!
+# http://www.breakingsystemsforfunandprofit.com/the-lolcats-they-are-everywhere/
 #
 DIR=/var/www/ternet
 while read URL; do
