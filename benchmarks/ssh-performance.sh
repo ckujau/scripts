@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c) christian@nerdbynature.de
+# (c)2014 Christian Kujau <lists@nerdbynature.de>
 # Poor wo/man's SSH benchmark
 #
 # Run with:

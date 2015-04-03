@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # (C)2013, lists@nerdbynature.de
-# Poor man's dm-crypt benchmark
+# Poor wo/man's dm-crypt benchmark
 #
 
 # DEBUG=echo

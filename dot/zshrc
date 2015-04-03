@@ -1,8 +1,10 @@
 #
-# ~/.kshrc
+# ~/.zshrc
 #
-export HISTFILE="$HOME"/.ksh_history
 export HISTSIZE=10000
+export SAVEHIST=10000
+export HISTFILE="$HOME"/.zsh_histfile
+export HISTCONTROL=ignoredups
 export HOSTNAME=$(hostname | awk -F\. '{print $1}')	# hostname -s is not portable
 
 if [ "$USER" = "root" ]; then
@@ -13,8 +15,6 @@ else
 	alias la='ls -lh'
 fi
 
-set -o emacs						# Try 'vi' for a change :-)
-
-if [ -f "$HOME"/.kshrc.local ]; then
-	. "$HOME"/.kshrc.local
+if [ -f "$HOME"/.zshrc.local ]; then
+	. "$HOME"/.zshrc.local
 fi

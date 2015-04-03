@@ -2,20 +2,21 @@
 #
 # (c)2014 Christian Kujau <lists@nerdbynature.de>
 #
-# SSH ciphers, MACs, key exchange algorithms
+# Attempts to open an SSH connection with different Ciphers, MACs and
+# Key Exchange Algorithms. The output can be fed to ssh-performance.sh later on.
+#
+# See also:
 # http://security.stackexchange.com/questions/25662/openssh-default-preferred-ciphers-hash-etc-for-ssh2
 #
 # Run with:
 # ./ssh-features.sh dummy@host0 2>&1 | tee ssh-eval.log
 #
-# Generate performance stats ssh-performance.sh later on.
-#
 
 # Find out which ciphers are supported in _our_ version. And we do this by looking up its manpage...is
 # there really no other way? (Apart from running strings(1) on the SSH binary)
-CIPHERS=$(man ssh_config | grep -A5 aes128-ctr, | fgrep , | xargs echo | sed 's/,/ /g')
-MACS=$(man ssh_config | grep -A15 MACs | grep \ \ [hu]mac | xargs echo | sed 's/,/ /g')
-KEX=$(man ssh_config | grep -A10 KexAlgorithms | egrep '(ecdh|diffie|curve)' | xargs echo | sed 's/,/ /g')
+CIPHERS=$(man ssh_config | grep -A5  aes128-ctr,   | fgrep , | xargs echo | sed 's/,/ /g')
+   MACS=$(man ssh_config | grep -A15 MACs          | egrep '  [hu]mac' | xargs echo | sed 's/,/ /g')
+    KEX=$(man ssh_config | grep -A10 KexAlgorithms | egrep '(ecdh|diffie|curve)' | xargs echo | sed 's/,/ /g')
 
 ssh -V 2>&1 | cat
 

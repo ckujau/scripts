@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # (c) 2009-2011 Christian Kujau <lists@nerdbynature.de>
 #
@@ -21,8 +21,7 @@
 #        nilfs2 - filesystem fills up until ENOSPC
 # v0.3 - run tiobench with only 1 thread, otherwise we get:
 #        Illegal division by zero at /usr/bin/tiobench line 163
-# v0.4 - rewrite for ksh: this way we have fancy features to replace seq(1)
-#        but still don't have to use a full blown bash.
+# v0.4 - rewrite for ksh
 # v0.5 - replace "date +%s"
 #        enable NILFS2, UFS and ZFS again
 #        rework the generic tests
