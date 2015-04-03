@@ -1,6 +1,7 @@
 #
 # ~/.bashrc.local
 #
+
 ##### Linux
 export PS1='\[\033[1;31m\]\h#\[\033[0m\] '
 
@@ -10,8 +11,8 @@ alias tidy="tidy -config $HOME/.tidyrc"
 # Combine pwgen & passwdqc
 pwgen_check() { pwgen $@ | pwqcheck -1 --multi; }
 
-# dmesg filter to omit printk timestamps
-npk() { sed 's/^\[[ 0-9\.]*\] //' }
+# dmesg filter to omit printk timestamps (if dmesg -t is not available yet)
+npk() { sed 's/^\[[ 0-9\.]*\] //'; }
 
 ##### MacOS X
 if [ -d /opt/local/bin ]; then
