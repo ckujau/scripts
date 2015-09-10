@@ -10,18 +10,8 @@
 #
 PATH=/opt/homebrew/bin:$PATH				# Maybe needed for netcat(1) on MacOS X
 
-if [ -z "$2" ]; then
-	echo "Usage: $(basename $0) [vm] [time]"
-	exit 1
-else
-	  VM="$1"
-	TIME="$2"			# How long to run "iperf"
-fi
-
-# unset me!
-# DEBUG=echo
-
 # https://www.virtualbox.org/manual/ch06.html#nichardware
+#
 # Am79C970A	- AMD PCNet PCI II
 # Am79C973	- AMD PCNet FAST III (default)
 # 82540EM	- Intel PRO/1000 MT Desktop (works with Windows Vista)
@@ -29,11 +19,56 @@ fi
 # 82545EM	- Intel PRO/1000 MT (for OVF imports from other platforms)
 # virtio	- virtio-net (supported by Linux 2.6.25 and Windows, see
 #		  http://www.linux-kvm.org/page/WindowsGuestDrivers) 
-#
-# VirtualboxName:ShortName
 TYPES="virtio"
 TYPES="Am79C970A virtio"
 TYPES="Am79C970A Am79C973 82540EM 82543GC 82545EM virtio"
+	
+_help() {
+echo "Usage: $(basename $0) [vm] [time]"
+echo "       $(basename $0) [report] [file]"
+exit 1
+}
+
+case $1 in
+	report)
+	[ -f "$2" ] && REPORT="$2" || _help
+
+	echo "### By NIC type:"
+	for t in $TYPES; do 
+		for m in hostonly bridged natnetwork nat; do
+			printf "NIC: $t / MODE: $m  "
+			grep -A7 "iperf: $m / NIC: $t" "$REPORT" | awk '/bits\/sec/ {print $(NF-1), $NF}'
+		done
+		echo
+	done
+
+	echo
+	echo "### By network mode:"
+	
+	for m in hostonly bridged natnetwork nat; do
+		for t in $TYPES; do
+			printf "NIC: $t / MODE: $m  "
+			grep -A7 "iperf: $m / NIC: $t" "$REPORT" | awk '/bits\/sec/ {print $(NF-1), $NF}'
+		done | sort -nk6
+		echo
+	done
+	exit $?
+	;;
+
+	[a-z]*)
+	$DEBUG VBoxManage showvminfo "$1" > /dev/null 2>&1 || _help
+	  VM="$1"
+	TIME="${2:-10}"			# How long to run "iperf"
+	;;
+	
+	*)
+	_help
+	;;
+esac
+
+# unset me!
+DEBUG=echo
+
 
 wait_until_stopped() {
 state="running"
@@ -89,7 +124,7 @@ for nic in $TYPES; do
 			--natpf4 "iperf,tcp,127.0.0.1,25001,10.0.2.15,5001" \
 			--natpf4 "ssh,tcp,127.0.0.1,25002,10.0.2.15,22" \
 			--natpf4 "foo,tcp,127.0.0.1,25003,10.0.2.15,1234"
-	sleep 2
+	$DEBUG sleep 2
 
 	# This should give us 4 NICs in the VM:
 	# 
