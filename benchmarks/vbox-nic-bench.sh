@@ -6,9 +6,13 @@
 #
 # Needed:
 # * Debian/GNU Linux guest with static addresses all set up (see below)
+# * password-less SSH root login to the gues
 # * iperf2 installed on the host and the guest
+# * netcat(1) (use the MacPorts variant for a MacOS X host!)
 #
-PATH=/opt/homebrew/bin:$PATH				# Maybe needed for netcat(1) on MacOS X
+
+# unset me!
+# DEBUG=echo
 
 # https://www.virtualbox.org/manual/ch06.html#nichardware
 #
@@ -19,8 +23,8 @@ PATH=/opt/homebrew/bin:$PATH				# Maybe needed for netcat(1) on MacOS X
 # 82545EM	- Intel PRO/1000 MT (for OVF imports from other platforms)
 # virtio	- virtio-net (supported by Linux 2.6.25 and Windows, see
 #		  http://www.linux-kvm.org/page/WindowsGuestDrivers) 
-TYPES="virtio"
 TYPES="Am79C970A virtio"
+TYPES="virtio"
 TYPES="Am79C970A Am79C973 82540EM 82543GC 82545EM virtio"
 	
 _help() {
@@ -37,7 +41,7 @@ case $1 in
 	for t in $TYPES; do 
 		for m in hostonly bridged natnetwork nat; do
 			printf "NIC: $t / MODE: $m  "
-			grep -A7 "iperf: $m / NIC: $t" "$REPORT" | awk '/bits\/sec/ {print $(NF-1), $NF}'
+			grep -A7 "iperf: $m / NIC: $t" "$REPORT" | awk '/Bytes\/sec/ {print $(NF-1), $NF}'
 		done
 		echo
 	done
@@ -48,7 +52,7 @@ case $1 in
 	for m in hostonly bridged natnetwork nat; do
 		for t in $TYPES; do
 			printf "NIC: $t / MODE: $m  "
-			grep -A7 "iperf: $m / NIC: $t" "$REPORT" | awk '/bits\/sec/ {print $(NF-1), $NF}'
+			grep -A7 "iperf: $m / NIC: $t" "$REPORT" | awk '/Bytes\/sec/ {print $(NF-1), $NF}'
 		done | sort -nk6
 		echo
 	done
@@ -66,38 +70,63 @@ case $1 in
 	;;
 esac
 
-# unset me!
-DEBUG=echo
+_stop_vm() {
+echo "INFO: Sending shutdown signal to "$VM"..."
+$DEBUG VBoxManage controlvm "$VM" acpipowerbutton
 
-
-wait_until_stopped() {
+echo "INFO: Wait until $VM is powered off..."
+i=0
 state="running"
-while [ "$state" = "running" ]; do
+ERROR=0
+
+# Bail out after 2 minutes
+while true; do
 	state=`VBoxManage showvminfo "$VM" --machinereadable | awk -F= '/^VMState=/ {print $2}' | sed 's/"//g'`
 	if [ "$state" = "poweroff" ]; then
 		echo "INFO: vm $VM state: $state"
 		break
 	else
 		echo "INFO: vm $VM state: $state"
-		sleep 2
+
+		if [ $i -gt 40 ]; then
+			echo "ERROR: timeout reached, sending poweroff..."
+			$DEBUG VBoxManage controlvm "$VM" poweroff || ERROR=1
+		fi
 	fi
+
+	sleep 3
+	i=$((i+1))
 done
 }
 
 wait_until_ssh() {
+j=0
+state="running"
+ERROR=0
+
 while true; do
-	# Somehow the stock netcat version does not timeout, even when -w1 is given
-	nc -w1 -z "$VM" 22 > /dev/null 2>&1 && break
+	# NOTE: On MacOS X, the stock netcat version does not timeout even when
+	# the -w1 option is given. We'll use the MacPorts version for that.
+	PATH=/opt/local/bin:$PATH nc -w1 -z "$VM" 22 > /dev/null 2>&1 && break
 	echo "INFO: vm $VM still not reachable via SSH"
+
+	# Bail out after 2 minutes
+	if [ $j -gt 40 ]; then
+		ERROR=1
+		echo "ERROR: timeout reached!"
+		break
+	fi
+
 	sleep 3
+	j=$((j+1))
 done
 }
 
-echo "INFO: Sending shutdown signal to "$VM"..."
-$DEBUG VBoxManage controlvm "$VM" acpipowerbutton
-
-echo "INFO: Wait until $VM is powered off..."
-$DEBUG wait_until_stopped
+$DEBUG _stop_vm
+if [ $ERROR = 1 ]; then
+	echo "ERROR: could not stop VM, bailing out"
+	exit 3
+fi
 $DEBUG sleep 2
 
 echo "INFO: Prepare NAT networking..."
@@ -111,16 +140,40 @@ $DEBUG VBoxManage natnetwork modify --netname natnet1 --dhcp off \
 $DEBUG VBoxManage natnetwork start --netname natnet1
 
 for nic in $TYPES; do
+	$DEBUG _stop_vm
+	[ $ERROR = 1 ] && continue
+
+	$DEBUG sleep 2
+
 	echo
 	echo "####### NIC: $nic"
 
 	echo "The VM $VM should be powered off now, let's configure 4 NICs..."
 	$DEBUG VBoxManage modifyvm "$VM" --natpf4 delete iperf --natpf4 delete ssh --natpf4 delete foo
+
+	# VirtualBox MAC address prefix is 08-00-27. Our NIC1 should already be configured and we don't
+	# want to change the MAC address here. Let's change it only for NIC2/3/4
+
+	# We also need to find out our primay network interface for "bridged" mode.
+	case $(uname -s) in
+		Darwin)
+		DEV=$(netstat -rn -f inet | awk '/^default/ {print $NF}')
+		;;
+
+		Linux)
+		DEV=$(netstat -rn -A inet | awk '/^0.0.0.0/ {print $NF}')
+		;;
+
+		*)
+		echo "Which platform are we on?"
+		exit 2
+	esac
+
 	$DEBUG VBoxManage modifyvm "$VM" \
-		--nic1 hostonly   --hostonlyadapter1 vboxnet0 --macaddress1 080027e28130 --nictype1 "$nic" \
-		--nic2 bridged    --bridgeadapter2   wlan0    --macaddress2 080027e28230 --nictype2 "$nic" \
-		--nic3 natnetwork --nat-network3     natnet1  --macaddress3 080027e28330 --nictype3 "$nic" \
-		--nic4 nat        --natnet4      10.0.2.0/24  --macaddress4 080027e28430 --nictype4 "$nic" \
+		--nic1 hostonly   --hostonlyadapter1 vboxnet0 --nictype1 "$nic" \
+		--nic2 bridged    --bridgeadapter2   $DEV     --nictype2 "$nic" --macaddress2 080027e20002 \
+		--nic3 natnetwork --nat-network3     natnet1  --nictype3 "$nic" --macaddress3 080027e20003 \
+		--nic4 nat        --natnet4      10.0.2.0/24  --nictype4 "$nic" --macaddress4 080027e20004 \
 			--natpf4 "iperf,tcp,127.0.0.1,25001,10.0.2.15,5001" \
 			--natpf4 "ssh,tcp,127.0.0.1,25002,10.0.2.15,22" \
 			--natpf4 "foo,tcp,127.0.0.1,25003,10.0.2.15,1234"
@@ -137,10 +190,10 @@ for nic in $TYPES; do
 	# is needed to have all this configured dynamically.
 	#
 	# - /etc/udev/rules.d/70-persistent-net.rules
-	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:81:30", KERNEL=="eth*", NAME="eth0"
-	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:82:30", KERNEL=="eth*", NAME="eth1"
-	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:83:30", KERNEL=="eth*", NAME="eth2"
-	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:84:30", KERNEL=="eth*", NAME="eth3"
+	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:??:??:??", KERNEL=="eth*", NAME="eth0"
+	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:20:02", KERNEL=="eth*", NAME="eth1"
+	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:20:03", KERNEL=="eth*", NAME="eth2"
+	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:20:04", KERNEL=="eth*", NAME="eth3"
 	#
 	# - /etc/network/interfaces
 	#
@@ -165,38 +218,40 @@ for nic in $TYPES; do
 
 	echo "Wait until SSH comes up..."
 	$DEBUG wait_until_ssh
+	[ $ERROR = 1 ] && continue
 	$DEBUG sleep 2
 
 	echo "The VM should be accessible via SSH now."
 	echo
 	$DEBUG ssh "$VM" "uname -a; lspci | grep net; iperf --server --daemon > /var/log/iperf-server_"$nic".log"
+	$DEBUG sleep 2
 
 	echo
 	echo "### iperf: hostonly / NIC: $nic"
-	$DEBUG iperf -t $TIME -c "$VM"
+	$DEBUG iperf -f M -t $TIME -c "$VM"
 
 	echo
 	echo "### iperf: bridged / NIC: $nic"
 	[ -z "$DEBUG" ] && IP_BR=$(ssh "$VM" "ip -4 addr show eth1 | awk '/inet/ {print \$2}' | sed 's|/[0-9]*||'")
-	$DEBUG iperf -t $TIME -c "$IP_BR"
+	$DEBUG iperf -f M -t $TIME -c "$IP_BR"
 
 	echo
 	echo "### iperf: natnetwork / NIC: $nic"
-	$DEBUG iperf -t $TIME -c 127.0.0.1 -p 15001
+	$DEBUG iperf -f M -t $TIME -c 127.0.0.1 -p 15001
 
 	echo
 	echo "### iperf: nat / NIC: $nic"
-	$DEBUG iperf -t $TIME -c 127.0.0.1 -p 25001
+	$DEBUG iperf -f M -t $TIME -c 127.0.0.1 -p 25001
 	echo
 
 	echo "Saving the VM's dmesg..."
-	$DEBUG ssh "$VM" "dmesg > dmesg_"$nic".txt"
+	$DEBUG ssh "$VM" dmesg > vbox_"$VM"_"$nic"_dmesg.txt
 
 	$DEBUG sleep 2
-	$DEBUG VBoxManage controlvm "$VM" acpipowerbutton
 
-	echo "INFO: Wait until $VM is powered off..."
-	$DEBUG wait_until_stopped
+	$DEBUG _stop_vm
+	[ $ERROR = 1 ] && continue
+
 	$DEBUG sleep 2
 	echo
 done
