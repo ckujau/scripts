@@ -1,0 +1,19 @@
+#
+# ~/.aliases
+#
+
+# Better safe than sorry
+alias mv='mv -i'
+alias cp='cp -i'
+alias rm='rm -i'
+
+# GREP_OPTIONS has been marked obsolete
+# http://debbugs.gnu.org/cgi/bugreport.cgi?bug=19998
+if grep --version 2>/dev/null | egrep -q 'GNU|BSD' 2>/dev/null; then
+	alias   grep='grep   --color=auto --devices=skip'
+	alias  egrep='egrep  --color=auto --devices=skip'
+	alias  fgrep='fgrep  --color=auto --devices=skip'
+	alias  zgrep='zgrep  --color=auto --devices=skip'
+	alias bzgrep='bzgrep --color=auto --devices=skip'
+	alias xzgrep='xzgrep --color=auto --devices=skip'
+fi

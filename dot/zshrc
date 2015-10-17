@@ -1,20 +1,32 @@
 #
 # ~/.zshrc
 #
-export HISTSIZE=10000
-export SAVEHIST=10000
-export HISTFILE="$HOME"/.zsh_histfile
-export HISTCONTROL=ignoredups
-export HOSTNAME=$(hostname | awk -F\. '{print $1}')	# hostname -s is not portable
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE=$HOME/.zsh_histfile
 
-if [ "$USER" = "root" ]; then
-	export PS1="${HOSTNAME}# "
+setopt append_history		# append, rather than replace history file entries
+setopt extended_history		# save timestamp & duration
+setopt hist_ignore_dups		# don't save duplicate history entries
+setopt hist_verify		# don't execute, only expand history
+setopt inc_append_history	# add commands as soon as they're entered
+setopt share_history		# import & append new commands to/from history file
+
+bindkey -e			# use EMACS keymap
+bindkey '^R' history-incremental-search-backward
+
+alias  history="fc -t '%Y-%m-%d %H:%M:%S' -l 0"
+
+if [ $UID = 0 ]; then
+	PS1="${HOST}# "
 	alias la='ls -lha'
 else
-	export PS1="${USER}@${HOSTNAME}$ "
+	PS1="${USER}@${HOST}$ "
 	alias la='ls -lh'
 fi
 
-if [ -f "$HOME"/.zshrc.local ]; then
-	. "$HOME"/.zshrc.local
-fi
+# Enable ZSH completion
+autoload -U compinit && compinit -i
+
+[ -r $HOME/.aliases     ] && . $HOME/.aliases
+[ -f $HOME/.shell.local ] && . $HOME/.shell.local

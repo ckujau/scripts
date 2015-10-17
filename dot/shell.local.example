@@ -1,8 +1,8 @@
 #
-# ~/.bashrc.local
+# ~/.shell.local
 #
 
-##### Linux
+# A more colourful prompt
 export PS1='\[\033[1;31m\]\h#\[\033[0m\] '
 
 # W3C Tidy
@@ -26,6 +26,10 @@ export SCREENDIR=$HOME/.screen
 alias top="top -o cpu"
 alias df="df -P"
 alias shuf="perl -MList::Util=shuffle -e 'print shuffle(<STDIN>);'"
+
+# Android SDK
+# alias      adb="/Applications/Non-Apple/AndroidSDK/sdk/platform-tools/adb"
+# alias fastboot="/Applications/Non-Apple/AndroidSDK/sdk/platform-tools/fastboot"
 
 # Enable "Secure Keyboard" for MacOS X
 # https://security.stackexchange.com/questions/47749/how-secure-is-secure-keyboard-entry-in-mac-os-xs-terminal

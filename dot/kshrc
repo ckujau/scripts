@@ -1,9 +1,10 @@
 #
 # ~/.kshrc
 #
-export HISTFILE="$HOME"/.ksh_history
+export HISTFILE=$HOME/.ksh_history
 export HISTSIZE=10000
-export HOSTNAME=$(hostname | awk -F\. '{print $1}')	# hostname -s is not portable
+export HOSTNAME=$(uname -n)
+export FCEDIT='/bin/false'
 
 if [ "$USER" = "root" ]; then
 	export PS1="${HOSTNAME}# "
@@ -15,6 +16,5 @@ fi
 
 set -o emacs						# Try 'vi' for a change :-)
 
-if [ -f "$HOME"/.kshrc.local ]; then
-	. "$HOME"/.kshrc.local
-fi
+[ -r $HOME/.aliases     ] && . $HOME/.aliases
+[ -r $HOME/.shell.local ] && . $HOME/.shell.local
