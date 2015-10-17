@@ -17,7 +17,8 @@ else
 		[ -f ."$f" ] && mv ."$f" ."$f".bak.$$
 		$PROG ."$f" https://raw.githubusercontent.com/ckujau/scripts/master/dot/"$f"
 	done
-	echo "Backup files can be removed with: rm $(ls -d .*.bak.* | xargs echo)"
+	BACKUP_FILES=$(ls -d .*.bak.* 2>/dev/null | xargs echo)
+	[ -z "$BACKUP_FILES" ] || echo "Backup files can be removed with: rm $BACKUP_FILES"
 
 	# ZSH uses .zprofile instead of .profile
 	[ -e .zprofile ] || ln -s .profile .zprofile
