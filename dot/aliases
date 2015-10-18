@@ -7,8 +7,11 @@ alias mv='mv -i'
 alias cp='cp -i'
 alias rm='rm -i'
 
-# GREP_OPTIONS has been marked obsolete
-# http://debbugs.gnu.org/cgi/bugreport.cgi?bug=19998
+# > grep: make GREP_OPTIONS obsolescent
+# > http://git.savannah.gnu.org/cgit/grep.git/commit/?id=50d843674e5df9f5d0111f07bbff8ce07c19df6a
+# 
+# > GREP_OPTIONS alternative?
+# > http://debbugs.gnu.org/cgi/bugreport.cgi?bug=19998
 if grep --version 2>/dev/null | egrep -q 'GNU|BSD' 2>/dev/null; then
 	alias   grep='grep   --color=auto --devices=skip'
 	alias  egrep='egrep  --color=auto --devices=skip'
