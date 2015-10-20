@@ -3,7 +3,7 @@
 #
 export HISTFILE=$HOME/.ksh_history
 export HISTSIZE=10000
-export HOSTNAME=$(uname -n)
+export HOSTNAME=$(uname -n | cut -d\. -f1)
 export FCEDIT='/bin/false'
 
 if [ "$USER" = "root" ]; then

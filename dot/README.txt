@@ -8,5 +8,6 @@ These dotfiles are usually executed in this order:
 
 If you like those, try one of the following:
 
- > curl https://raw.githubusercontent.com/ckujau/scripts/master/dot/install-dot.sh | sh
- > wget -O- https://raw.githubusercontent.com/ckujau/scripts/master/dot/install-dot.sh | sh
+ > curl      https://raw.githubusercontent.com/ckujau/scripts/master/dot/install-dot.sh | sh
+ > fetch -o- https://raw.githubusercontent.com/ckujau/scripts/master/dot/install-dot.sh | sh
+ > wget  -O- https://raw.githubusercontent.com/ckujau/scripts/master/dot/install-dot.sh | sh
