@@ -13,7 +13,7 @@ Note: values are set with `user_pref`
 
 ## Per-site
 
-Place a file called `local-settings.js` into the [installation directory](http://kb.mozillazine.org/Installation_directory):
+Place a file called `autoconfig.js` into the [installation directory](http://kb.mozillazine.org/Installation_directory):
 
 ```
  Linux: /usr/lib{,64}/firefox/browser/defaults/preferences/
@@ -27,10 +27,10 @@ This file should have the following content:
 ```
   // Do not obscure the content with ROT-13
   pref("general.config.obscure_value", 0);
-  pref("general.config.filename", "firefox.cfg");
+  pref("general.config.filename", "mozilla.cfg");
 ```
 
-The `firefox.cfg` must be stored where the actual Mozilla binary is located:
+The `mozilla.cfg` must be stored where the actual Mozilla binary is located:
 
 ```
   Linux: /usr/lib{,64}/firefox/
@@ -39,9 +39,9 @@ Windows: %ProgramFiles%\Mozilla Firefox\
 ```
 
 Notes:
-* Values in `firefox.cfg` can be set with `defaultPref` or `lockPref`
+* Values in `mozilla.cfg` can be set with `defaultPref` or `lockPref`
 * In Debian, Firefox is called Iceweasel and its defaults are stored
-  elsewhere: both `local-settings.js` and `firefox.cfg` can reside in 
+  elsewhere: both `autoconfig.js` and `mozilla.cfg` can reside in 
   `/etc/iceweasel/pref`, but the latter needs to be symlinked to `/usr/lib/iceweasel`
 
 # Links
