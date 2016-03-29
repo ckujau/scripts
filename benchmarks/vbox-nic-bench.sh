@@ -1,13 +1,14 @@
 #!/bin/sh
 #
 # (c)2015 Christian Kujau <lists@nerdbynature.de>
-#
 # Some kind of network benchmark for VirtualBox machines
 #
 # Needed:
-# * Debian/GNU Linux guest with static addresses all set up (see below)
-# * password-less SSH root login to the gues
-# * iperf2 installed on the host and the guest
+# * Guest VM with static IP addresses all set up. The trick is to get the VM
+#   to aquire network connectivity, even if the interfaces changes. Magic boot
+#   routines trying to guess the correct NIC may cause trouble.
+# * password-less SSH (root) login to the guest VM
+# * iperf2 installed on the host and the guest VM
 # * netcat(1) (use the MacPorts variant for a MacOS X host!)
 #
 
@@ -22,9 +23,9 @@
 # 82543GC	- Intel PRO/1000 T Server (recognized by Windows XP)
 # 82545EM	- Intel PRO/1000 MT (for OVF imports from other platforms)
 # virtio	- virtio-net (supported by Linux 2.6.25 and Windows, see
-#		  http://www.linux-kvm.org/page/WindowsGuestDrivers) 
-TYPES="Am79C970A virtio"
-TYPES="virtio"
+#		  http://www.linux-kvm.org/page/WindowsGuestDrivers)
+#
+TYPES="Am79C970A virtio"					# test
 TYPES="Am79C970A Am79C973 82540EM 82543GC 82545EM virtio"
 	
 _help() {
@@ -41,19 +42,20 @@ case $1 in
 	for t in $TYPES; do 
 		for m in hostonly bridged natnetwork nat; do
 			printf "NIC: $t / MODE: $m  "
-			grep -A7 "iperf: $m / NIC: $t" "$REPORT" | awk '/Bytes\/sec/ {print $(NF-1), $NF}'
-		done
+			RESULT=$(grep -A7 "iperf: $m / NIC: $t" "$REPORT" | awk '/Bytes\/sec/ {print $(NF-1), $NF}')
+			[ -n "$RESULT" ] && echo "$RESULT" || echo "-"
+		done | sort -rnk6
 		echo
 	done
 
 	echo
 	echo "### By network mode:"
-	
 	for m in hostonly bridged natnetwork nat; do
 		for t in $TYPES; do
 			printf "NIC: $t / MODE: $m  "
-			grep -A7 "iperf: $m / NIC: $t" "$REPORT" | awk '/Bytes\/sec/ {print $(NF-1), $NF}'
-		done | sort -nk6
+			RESULT=$(grep -A7 "iperf: $m / NIC: $t" "$REPORT" | awk '/Bytes\/sec/ {print $(NF-1), $NF}')
+			[ -n "$RESULT" ] && echo "$RESULT" || echo "-"
+		done | sort -rnk6
 		echo
 	done
 	exit $?
@@ -174,9 +176,9 @@ for nic in $TYPES; do
 		--nic2 bridged    --bridgeadapter2   $DEV     --nictype2 "$nic" --macaddress2 080027e20002 \
 		--nic3 natnetwork --nat-network3     natnet1  --nictype3 "$nic" --macaddress3 080027e20003 \
 		--nic4 nat        --natnet4      10.0.2.0/24  --nictype4 "$nic" --macaddress4 080027e20004 \
-			--natpf4 "iperf,tcp,127.0.0.1,25001,10.0.2.15,5001" \
-			--natpf4 "ssh,tcp,127.0.0.1,25002,10.0.2.15,22" \
-			--natpf4 "foo,tcp,127.0.0.1,25003,10.0.2.15,1234"
+			--natpf4 "iperf,tcp,127.0.0.1,25001,10.0.2.123,5001" \
+			--natpf4 "ssh,tcp,127.0.0.1,25002,10.0.2.123,22" \
+			--natpf4 "foo,tcp,127.0.0.1,25003,10.0.2.123,1234"
 	$DEBUG sleep 2
 
 	# This should give us 4 NICs in the VM:
@@ -191,9 +193,9 @@ for nic in $TYPES; do
 	#
 	# - /etc/udev/rules.d/70-persistent-net.rules
 	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:??:??:??", KERNEL=="eth*", NAME="eth0"
-	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:20:02", KERNEL=="eth*", NAME="eth1"
-	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:20:03", KERNEL=="eth*", NAME="eth2"
-	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:20:04", KERNEL=="eth*", NAME="eth3"
+	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:00:02", KERNEL=="eth*", NAME="eth1"
+	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:00:03", KERNEL=="eth*", NAME="eth2"
+	# SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="08:00:27:e2:00:04", KERNEL=="eth*", NAME="eth3"
 	#
 	# - /etc/network/interfaces
 	#
@@ -202,15 +204,21 @@ for nic in $TYPES; do
 	# iface eth0 inet dhcp
 	#
 	# # bridged
-	# # /32, because we're in the same network as
-	# # eth0 and we don't want a 2nd route
-	# iface eth1 inet static / address 192.168.0.248 / netmask 255.255.255.255
+	# # The /32 may be needed when we're in the same network as eth0 and we
+	# # don't want a second network route
+	# iface eth1 inet static
+	#    address 192.168.0.123
+	#    netmask 255.255.255.255
 	#
 	# # nat-network
-	# iface eth2 inet static / address 192.168.15.4 / netmask 255.255.255.0
+	# iface eth2 inet static
+	#    address 192.168.15.123
+	#    netmask 255.255.255.0
 	#
 	# # nat
-	# iface eth3 inet static / address 10.0.2.15 / netmask 255.255.255.0
+	# iface eth3 inet static
+	#    address 10.0.2.123
+	#    netmask 255.255.255.0
 	#
 
 	echo "Start the VM..."
