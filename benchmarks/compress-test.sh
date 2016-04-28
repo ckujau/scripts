@@ -18,7 +18,7 @@ fi
 cat "$FILE" > /dev/null		# Utilize caching...
 
 for o in 9c 1c dc; do
-	for p in gzip bzip2 pbzip2 xz lzma; do
+	for p in gzip pigz bzip2 pbzip2 xz lzma; do
 		SIZE1=`stat -c %s "$FILE"`
 		START=`date +%s`
 
