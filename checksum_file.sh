@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c) 2013, Christian Kujau <lists@nerdbynature.de>
+# (c)2013 Christian Kujau <lists@nerdbynature.de>
 #
 # Generate checksums of files and store them
 # via Extended Attributes

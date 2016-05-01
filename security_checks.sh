@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c) 2010 lists@nerdbynature.de
+# (c)2010 Christian Kujau <lists@nerdbynature.de>
 #
 # Execute a few security checks, keep state across runs.
 #   rkhunter: http://www.rootkit.nl/projects/rootkit_hunter.html

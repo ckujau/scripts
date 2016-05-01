@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c)2011 lists@nerdbynature.de
+# (c)2011 Christian Kujau <lists@nerdbynature.de>
 # Send SysRq to VirtualBox virtual machines
 #
 # The schema for sending sysrq keycodes is:

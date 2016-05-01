@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c) 2009, lists@nerdbynature.de
+# (c)2009 Christian Kujau <lists@nerdbynature.de>
 # therm_adt746x cannot be queried via i2c, so
 # we're not using lm_sensors but this little script
 #

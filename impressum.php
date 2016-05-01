@@ -1,8 +1,8 @@
 <?php
 /*
- * (c) lists@nerdbynature.de
- * Generate a German imprint for websites.
+ * (c)2014 Christian Kujau <lists@nerdbynature.de>
  *
+ * Generate a German imprint for websites.
  * Note: the MDStV (Staatsvertrag ueber Mediendienste) has been decommisioned
  * on 2008-03-01 and has been replaced with the TMG (Telemediengesetz).
  *

@@ -1,10 +1,10 @@
 #!/usr/bin/env expect -f
 #
-# (c) 2011, lists@nerdbynature.de
+# (c)2011 Christian Kujau <lists@nerdbynature.de>
+#
 # 1) Login to a terminalserver (Bay Networks Remote Annex 2000)
 # 2) Execute a command on a Remote Power Boot Switch (WTI RPB+)
 #
-
 if {$argc!=4} {
 send_user "   Usage: $argv0 \[server\] \[port\] \[password\] \[command\]\n"
 send_user "Commands: /s /d /\[1-5\]\[on|off|boot\]\n"

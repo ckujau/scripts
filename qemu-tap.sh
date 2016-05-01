@@ -1,5 +1,7 @@
 #!/bin/sh
 #
+# (c)2015 Christian Kujau <lists@nerdbynature.de>
+#
 # Based on:
 # https://superuser.com/questions/596095/how-do-i-bridge-a-connection-from-wi-fi-to-tap-on-mac-os-x-for-the-emulator-qe
 # http://en.blog.guylhem.net/post/88201449689/running-qemu-with-tap0-and-nat-under-osx-10-9-maverick

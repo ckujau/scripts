@@ -1,6 +1,6 @@
 <?php
 /*
- * (c)2009 lists@nerdbynature.de
+ * (c)2009 Christian Kujau <lists@nerdbynature.de>
  * Display REMOTE_ADDR, HTTP_X_FORWARDED_FOR, HTTP_USER_AGENT of the client
  *
  */

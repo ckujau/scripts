@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/ksh
 #
 # (C) Mule, 2009-08-07
 # The Lolcats, they are everywhere!

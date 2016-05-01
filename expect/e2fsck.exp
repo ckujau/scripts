@@ -1,7 +1,9 @@
 #!/usr/bin/expect -f
 #
-# (c) 2009, lists@nerdbynature.de
-# Run e2fsck via expect, see http://nerdbynature.de/s9y/?128
+# (c)2009 Christian Kujau <lists@nerdbynature.de>
+#
+# Run e2fsck via expect, see
+# http://nerdbynature.de/s9y/2009/10/18/e2fsck-expect
 #
 set timeout -1
 spawn /sbin/e2fsck -v $argv

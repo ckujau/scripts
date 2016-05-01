@@ -1,13 +1,14 @@
 #!/bin/sh
 #
-# (C)2009 lists@nerdbynature.de
+# (c)2009 Christian Kujau <lists@nerdbynature.de>
 #
 # We once had a one-liner to backup all our databases:
+#
 #    $ mysqldump -AcfFl --flush-privileges | pbzip2 -c > backup.sql.bz2
 #
-# However, most of the databases do not change much or do not change at
-# over the day, yet the resulting .bz2 had to be generated every day,
-# *did* change and, worst of all: had to be transferred in full over a
+# However, most of the databases do not change much or do not change at all
+# over the day, yet the resulting .bz2 had to be generated every day. The
+# compressed result _did_ change however and to be transferred in full over a
 # 128 kbps line to our backup host. This one is slightly more complicated,
 # but should suffice.
 #

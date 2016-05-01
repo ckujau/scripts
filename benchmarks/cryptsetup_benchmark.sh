@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (C)2013, lists@nerdbynature.de
+# (c)2013 Christian Kujau <lists@nerdbynature.de>
 # Poor wo/man's dm-crypt benchmark
 #
 

@@ -1,6 +1,7 @@
 #!/bin/sh
 #
-# (c) Christian Kujau <lists@nerdbynature.de>
+# (c)2015 Christian Kujau <lists@nerdbynature.de>
+#
 # Benchmark various checksum programs
 #
 # Example:

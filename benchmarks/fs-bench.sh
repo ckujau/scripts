@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c) 2009-2011 Christian Kujau <lists@nerdbynature.de>
+# (c)2009 Christian Kujau <lists@nerdbynature.de>
 #
 # Yet another filesystem benchmark script
 #

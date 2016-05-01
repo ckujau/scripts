@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c)2009, Christian Kujau <lists@nerdbynature.de>
+# (c)2009 Christian Kujau <lists@nerdbynature.de>
 #
 # The therm_adt746x kernel module is not using standard i2c routines
 # and we cannot use lm_sensors to request fan or temperature status.

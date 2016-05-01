@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c)2010, lists@nerdbynature.de
+# (c)2010 Christian Kujau <lists@nerdbynature.de>
 #
 # Install a new kernel, System.map and .config,
 # but not via the usual "make install" routine

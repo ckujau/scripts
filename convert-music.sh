@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (C) Christian Kujau <lists@nerdbynature.de>
+# (c)2014 Christian Kujau <lists@nerdbynature.de>
 #
 # Convert music from/to various formats
 #

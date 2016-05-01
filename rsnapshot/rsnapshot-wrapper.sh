@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c) 2009 Christian Kujau <lists@nerdbynature.de>
+# (c)2009 Christian Kujau <lists@nerdbynature.de>
 #
 # Rsnapshot wrapper script. For this to work, the rsnapshot.conf
 # file for each host must include the following directives:

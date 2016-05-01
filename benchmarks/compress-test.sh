@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (C)2011 Christian Kujau <lists@nerdbynature.de>
+# (c)2011 Christian Kujau <lists@nerdbynature.de>
 #
 # Compress a file with different programs and see how long it took to do this.
 #

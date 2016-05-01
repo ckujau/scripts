@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # (c)2013 Christian Kujau <lists@nerdbynature.de>
+#
 # There's currently no way to list the fingerprints of all the keys in
 # authorized_keys separately. This may be useful to see if a certain
 # public key is listed in authorized_keys.

@@ -4,7 +4,6 @@
 # (C) Mitch Frazier, 2008-08-27
 # http://www.linuxjournal.com/content/convert-diff-output-colorized-html
 #
-
 cat <<XX
 <html>
 <head>

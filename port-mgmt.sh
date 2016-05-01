@@ -1,5 +1,6 @@
 #!/bin/sh
 #
+# (c)2014 Christian Kujau <lists@nerdbynature.de>
 # MacPorts cleanup
 #
 PATH=/bin:/usr/bin:/opt/local/bin

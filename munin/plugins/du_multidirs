@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c)2009, Christian Kujau <lists@nerdbynature.de>
+# (c)2009 Christian Kujau <lists@nerdbynature.de>
 # Based on the 'homedirs' plugin, initially written in Perl by Philipp Gruber <pg@flupps.net>
 #
 # We still need a cronjob to update CACHEFILE once in a while, e.g.:
