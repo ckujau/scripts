@@ -6,7 +6,7 @@
 
 # DEBUG=echo
 
-if [ ! -b "$1" -o -z "$4" ]; then
+if [ ! -b "$1" ] || [ -z "$4" ]; then
 	echo "Usage: $0 [device] [cipher] [size] [runs]"
 	echo "Examples:"
 	echo "`basename $0` /dev/sdu1 aes-cbc-plain 128"

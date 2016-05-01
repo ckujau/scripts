@@ -20,7 +20,7 @@
 # Convert Flac to Mp3
 # https://wiki.archlinux.org/index.php/Convert_Flac_to_Mp3
 #
-if [ ! $# -eq 2 -o ! -f "$2" ]; then
+if [ ! $# -eq 2 ] || [ ! -f "$2" ]; then
 	echo "Usage: `basename $0` [conversion] [file]"
 	echo "Conversions: flac2mp3, m4a2mp3, ogg2mp3"
 	exit 1
@@ -86,7 +86,7 @@ case $CONVERSION in
 	OUTPUT=${FILE%.ogg}.mp3
 	eval `ogginfo -qv "$FILE" | awk '/ARTIST/ || /TITLE/' | sed 's/^     //'`
 #	echo "ARTIST: $ARTIST TITLE: $TITLE"
-	if [ -z "$ARTIST" -o -z "$TITLE" ]; then
+	if [ -z "$ARTIST" ] || [ -z "$TITLE" ]; then
 		echo "WARNING: Not enough metadata, trying to gather track information from filename! ($FILE)"
 		 TRACK=$(ls "$FILE" | awk -F\  '{print $1}')
 		 TITLE=$(ls "$FILE" | sed 's/^[0-9]* - //;s/\.ogg//')

@@ -14,7 +14,7 @@ MAXAGE=7
 # DEBUG=echo
  
 # BTS# 231267
-if [ -f "$STATE" -a ! -L "$STATE" ]; then
+if [ -f "$STATE" ] && [ ! -L "$STATE" ]; then
 	:
 else
 	$DEBUG rm -f "$STATE"

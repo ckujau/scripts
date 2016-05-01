@@ -39,7 +39,7 @@ print_usage()
 	echo "       `basename $0` [remove]    [file]"
 }
 
-if [ $# -ne 2 -o ! -f "$2" ]; then
+if [ $# -ne 2 ] || [ ! -f "$2" ]; then
 	print_usage
 	exit 1
 else

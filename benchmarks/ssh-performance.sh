@@ -8,7 +8,7 @@
 #
 # The ssh-eval.log must be created with ssh-features.sh.
 #
-if [ ! -f "$1" -o $# -ne 3 ]; then
+if [ ! -f "$1" ] || [ $# -ne 3 ]; then
 	echo "Usage: $(basename $0) [ssh-eval.log] [user@][host] [size-in-MB]"
 	exit 1
 else

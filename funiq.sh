@@ -4,13 +4,12 @@
 # Fuzzy uniq (or Parsing Connect:Direct stats part 3)
 # http://cdunix.blogspot.com/2008/10/fuzzy-uniq-or-parsing-connectdirect.html
 #
-# Get percentage of similarity from -s command line option, or 85 for default
+# Get percentage of similarity from command line option, or 85 for default
 #
 
 # Percentage of similarity
-if [ "$1" = "-s" -a -n "$2" ]; then
-	SIM=$2
-	shift 2
+if [ -n "$1" ]; then
+	SIM=$1
 else
 	SIM=85
 fi

@@ -165,7 +165,7 @@ else
 	. "$CONF"
 
 	# We need these to run
-	if [ ! -d "$CONFDIR" -o -z "$LOG" -o -z "$PIDFILE" ]; then
+	if [ ! -d "$CONFDIR" ] || [ -z "$LOG" ] || [ -z "$PIDFILE" ]; then
 		log "**** Please check CONFDIR, LOG, PIDFILE in $CONF!" 1
 	fi
 

@@ -53,7 +53,7 @@ fi
 }
 
 # sanity checks
-if [ ! -b "$1" -o ! -d "$2" -o ! -f $CONF ]; then
+if [ ! -b "$1" ] || [ ! -d "$2" ] || [ ! -f $CONF ]; then
 	log "Usage: `basename $0` [dev] [mpt]"
 	log "Make sure $CONF exists!" 1
 else
@@ -189,7 +189,7 @@ umountfs() {
 case $fs in
 	zfs)
 	# ...and special case Linux/ZFS again
-	if [ "`uname -s`" = Linux -a -z "`pgrep zfs-fuse`" ]; then
+	if [ "`uname -s`" = Linux ] && [ -z "`pgrep zfs-fuse`" ]; then
 		log "zfs-fuse not running!" 1
 	fi
 	$DEBUG sync
@@ -403,7 +403,7 @@ GEN_END=$(date +%s)
 GEN_DUR=`echo "scale=2; $GEN_END - $GEN_BEGIN" | bc -l`
  NUMDIRS_C=`find $MPT/manyfiles -type d | wc -l`
 NUMFILES_C=`find $MPT/manyfiles -type f | wc -l`
-[ `expr $NUMDIRS_C - 1` = $NUMDIRS -a $NUMFILES_C = `expr $NUMDIRS \* $NUMFILES` ] || ERR="- FAILED"
+[ `expr $NUMDIRS_C - 1` = $NUMDIRS ] && [ $NUMFILES_C = `expr $NUMDIRS \* $NUMFILES` ] || ERR="- FAILED"
 log "$FSP.4: $GEN_DUR seconds to create $NUMFILES files in each of the $NUMDIRS directories $ERR" >> $LOG/raw/generic-$fs.log
 ERR=""
 
@@ -436,7 +436,7 @@ GEN_END=$(date +%s)
 GEN_DUR=`echo "scale=2; $GEN_END - $GEN_BEGIN" | bc -l`
  NUMDIRS_C=`find $MPT/manydirs -type d | wc -l`
 NUMFILES_C=`find $MPT/manydirs -type f | wc -l`
-[ `expr $NUMDIRS_C - 1` = $NUMFILES -a $NUMFILES_C = `expr $NUMDIRS \* $NUMFILES` ] || ERR="- FAILED"
+[ `expr $NUMDIRS_C - 1` = $NUMFILES ] && [ $NUMFILES_C = `expr $NUMDIRS \* $NUMFILES` ] || ERR="- FAILED"
 log "$FSP.6: $GEN_DUR seconds to create $NUMDIRS files in each of the $NUMFILES directories $ERR" >> $LOG/raw/generic-$fs.log
 ERR=""
 

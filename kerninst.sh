@@ -55,7 +55,7 @@ else
 fi
 
 # We might specify a build directory
-if   [ -d "$2" -a -x "$2"/vmlinux ]; then
+if   [ -d "$2" ] && [ -x "$2"/vmlinux ]; then
 	BUILDDIR="$2"
 	OPTIONS="O=$BUILDDIR"
 
