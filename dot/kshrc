@@ -1,6 +1,8 @@
 #
 # ~/.kshrc
 #
+# Note: The MirBSD Korn shell may expect a ~/.mkshrc file
+#
 export HISTFILE=$HOME/.ksh_history
 export HISTSIZE=10000
 export HOSTNAME=$(uname -n | cut -d\. -f1)
