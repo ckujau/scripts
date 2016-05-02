@@ -40,3 +40,17 @@ defaults write com.apple.Terminal SecureKeyboardEntry 1
 function pwdx {
         lsof -a -p $1 -d cwd -n | tail -1 | awk '{print $NF}'
 }
+
+# Look for running SSH agents
+SSH_AGENT_PID_TEMP=$(pgrep -u $LOGNAME ssh-agent | head -1)
+if [ -n "$SSH_AGENT_PID_TEMP" ]; then
+	SSH_AUTH_SOCK_TEMP=$(find /tmp/ssh-* -name "agent.*$((SSH_AGENT_PID_TEMP-1))" -user $LOGNAME -type s 2>/dev/null)
+	if [ -S "$SSH_AUTH_SOCK_TEMP" ]; then
+		export SSH_AGENT_PID="$SSH_AGENT_PID_TEMP"
+		export SSH_AUTH_SOCK="$SSH_AUTH_SOCK_TEMP"
+		unset SSH_AGENT_PID_TEMP SSH_AUTH_SOCK_TEMP
+	fi
+fi
+
+# dmesg: translate relative printk time stamps to absolute time stamps
+alias kmsg='dmesg | perl -ne "BEGIN{\$a= time()- qx!cat /proc/uptime!}; s/\[\s*(\d+)\.\d+\]/localtime(\$1 + \$a)/e; print \$_;"'

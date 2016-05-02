@@ -1,13 +1,14 @@
 #
 # ~/.bashrc
 #
+export HISTFILE=$HOME/.bash_history
 export HISTTIMEFORMAT="%F %T "
 export HISTSIZE=10000
 export HISTCONTROL=ignoredups
 shopt -s histappend
 export PROMPT_COMMAND="history -a"
 
-if [ $UID = 0 ]; then
+if [ $LOGNAME = 0 ]; then
 	export PS1="\h# "
 	alias la="ls -lha"
 else

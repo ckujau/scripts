@@ -6,11 +6,11 @@ export HISTSIZE=10000
 export HOSTNAME=$(uname -n | cut -d\. -f1)
 export FCEDIT='/bin/false'
 
-if [ "$USER" = "root" ]; then
+if [ "$LOGNAME" = "root" ]; then
 	export PS1="${HOSTNAME}# "
 	alias la='ls -lha'
 else
-	export PS1="${USER}@${HOSTNAME}$ "
+	export PS1="${LOGNAME}@${HOSTNAME}$ "
 	alias la='ls -lh'
 fi
 
