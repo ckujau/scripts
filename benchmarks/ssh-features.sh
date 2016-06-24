@@ -5,8 +5,9 @@
 # Attempts to open an SSH connection with different Ciphers, MACs and
 # Key Exchange Algorithms. The output can be fed to ssh-performance.sh later on.
 #
-# See also:
-# http://security.stackexchange.com/questions/25662/openssh-default-preferred-ciphers-hash-etc-for-ssh2
+# Note: Starting with OpenSSH 6.3, we can use "ssh -Q" to enumerate all known 
+# ciphers, MAC and key exchange algorithms, so this script is kinda obsolete now.
+# http://www.openssh.com/txt/release-6.3
 #
 # Run with:
 # ./ssh-features.sh dummy@host0 2>&1 | tee ssh-eval.log
