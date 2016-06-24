@@ -2,21 +2,23 @@
 #
 # (c)2014 Christian Kujau <lists@nerdbynature.de>
 # Poor wo/man's SSH benchmark. Inspired by:
-# 
-# OpenSSH default/preferred ciphers, hash, etc for SSH2
-# http://security.stackexchange.com/questions/25662/openssh-default-preferred-ciphers-hash-etc-for-ssh2
+# > OpenSSH default/preferred ciphers, hash, etc for SSH2
+# > http://security.stackexchange.com/questions/25662/openssh-default-preferred-ciphers-hash-etc-for-ssh2
 #
 # Compare with:
 # > OpenBSD: cipher-speed.sh
 # > https://anongit.mindrot.org/openssh.git/tree/regress/cipher-speed.sh
 #
+
 _help() {
 	echo "Usage: $(basename $0) run    [user@][host] [size-in-MB] [runs]"
 	echo "       $(basename $0) report [performance.log] [top]"
 	exit 1
 }
 
+#
 # Benchmark
+#
 _run() {
 # We'll need a temporary file, but remove it later on.
 TEMP=$(mktemp)
@@ -86,13 +88,15 @@ done
 }
 
 _filter() {
-# Tthe progress meter messed up our log file and we'll remove the control
+#
+# The progress meter messed up our log file and we'll remove the control
 # characters again with this ugly sed string.
 # Or, use cat-v:  ... | cat -v | sed 's/1\^H.*\^H//' 
 #
 	grep seconds "$1" | sed 's/[0-9]\x08//g;s/\x08//'
 }
 
+#
 # Reports
 #
 _report() {
@@ -134,6 +138,7 @@ for k in $(_filter "$FILE" | awk '/seconds/ {print $8}' | sort -u); do
 done
 }
 
+# Pick your poison.
 case $1 in
 	run)
 	if [ $# -ne 4 ]; then
