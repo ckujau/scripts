@@ -4,6 +4,14 @@
 #
 # Compress a file with different programs and see how long it took to do this.
 #
+# Compare the results like this:
+#
+# for o in 9c 1c dc; do
+#   for p in gzip pigz bzip2 pbzip2 xz lzma; do
+#     awk "/"$p"\/"$o"/ {sum+=\$3} END {print \"$p/$o\t\", sum/8}" results_*.out
+#   done | sort -nk2; echo
+# done
+#
 
 if [ ! -f "$1" ]; then
 	echo "Usage: `basename $0` [file]"
