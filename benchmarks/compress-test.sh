@@ -1,19 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env ksh
 #
-# (c)2011 Christian Kujau <lists@nerdbynature.de>
+# (c)2011-2016 Christian Kujau <lists@nerdbynature.de>
 #
 # Compress a file with different programs and see how long it took to do this.
-# Note: we need Bash for string-matching here.
-#
-# Compare the results like this:
-#
-# for i in {1..3}; do ../compress-test.sh test.file | tee results_${i}.out; done
-#
-# for o in 9c 1c dc; do
-#   for p in gzip pigz bzip2 pbzip2 xz lzma zstd brotli; do
-#     awk "/"$p"\/"$o"/ {sum+=\$3} END {print \"$p/$o\t\", sum/8}" results_*.out
-#   done | sort -nk2; echo
-# done
 #
 # Links:
 #
@@ -34,27 +23,73 @@
 # * zstd supports -[1..22] as compression levels. Should we employ a mapping
 #   scheme here as well? E.g. "gzip -6c" ~ "zstd -10c"?
 #
-PROGRAMS="gzip zstd brotli"
-PROGRAMS="gzip pigz bzip2 pbzip2 xz lzma brotli zstd pzstd"
-MODES="9c 1c dc"				# {1..9}c for most programs
+PATH=/usr/local/bin:/usr/bin:/bin
+PROGRAMS=${PROGRAMS:-gzip pigz bzip2 pbzip2 xz pxz lzma plzma brotli zstd pzstd}
+MODES=${MODES:-9c 1c dc}			# {1..9}c for most programs
 						# dc for decompression
 # unset me!
 # DEBUG=echo
 
-if [ ! -f "$1" ]; then
-	echo "Usage: `basename $0` [file]"
+_help() {
+	echo "Usage: `basename $0` [-n runs] [-f file]"
+	echo "       `basename $0` [-r results]"
+	echo
+	echo "Available environment variables that can be set:"
+	echo "PROGRAMS (default: $PROGRAMS)"
+	echo "   MODES (default: $MODES)"
+	echo
 	exit 1
-else
-	FILE="$1"
-fi
+}
 
-cat "$FILE" > /dev/null			# Read file into RAM
+_report() {
+	echo "### Fastest compressor:"
+	grep -v /dc "$REPORT" | sort -nk3
+	echo
+
+	echo "### Smallest size:"
+	grep -v /dc "$REPORT" | sort -nrk5
+	echo
+
+	echo "### Fastest decompressor:"
+	grep    /dc "$REPORT" | sort -nk3
+	echo
+	exit $?
+}
+
+# Gather options
+while getopts "n:f:r:" opt; do
+	case $opt in
+	n)
+	runs=${OPTARG}
+	;;
+
+	f)
+	FILE=${OPTARG}
+	;;
+
+	r)
+	REPORT=${OPTARG}
+	;;
+
+	*)
+	_help
+	;;
+	esac
+done
+
+# Are we in report mode?
+[ -f "$REPORT" ] && _report
+
+# Default to one run
+RUNS=${runs:-1}
+
+# Read file into RAM once
+[ -f "$FILE" ] && cat "$FILE" > /dev/null || _help
 
 # Iterate through all programs, modes
 for o in $MODES; do
 	for p in $PROGRAMS; do
-#	echo "### MODE: $o  PROG: $p"
-		SIZE1=`stat -c %s "$FILE"`
+		SIZE1=`ls -go "$FILE" | awk '{print $3}'`
 		START=`date +%s`
 
 		# brotli: why can't you have the same options, hm?
@@ -77,18 +112,22 @@ for o in $MODES; do
 		if [ $p = "zstd" ] || [ $p = "pzstd" ]; then
 			oe=q${o}
 		fi
-	
-		# discard output on decompression
-		if [[ $o == "dc" ]] || [[ $oe == "qdc" ]] || [[ $oe =~ "decompress" ]]; then
-			$DEBUG ${p} -${oe} "$FILE"."$p" > /dev/null
-		else
-			$DEBUG ${p} -${oe} "$FILE" > "$FILE"."$p"
-		fi
+
+		# Repeat n times
+		for n in {1..$RUNS}; do
+		#	echo "### RUN: $n MODE: $o  PROG: $p"
+			# Discard output during decompression
+			if [[ $o == "dc" ]] || [[ $oe == "qdc" ]] || [[ $oe =~ "decompress" ]]; then
+				$DEBUG ${p} -${oe} "$FILE"."$p" > /dev/null
+			else							# Compress
+				$DEBUG ${p} -${oe} "$FILE" > "$FILE"."$p"
+			fi
+		done		# END RUNS
 
 		# Statistics
 		  END=`date +%s`
-		SIZE2=`stat -c %s "$FILE"."$p"`
-		 DIFF=`echo "scale=2; $END - $START" | bc -l`
+		SIZE2=`ls -go "$FILE"."$p" | awk '{print $3}'`
+		 DIFF=`echo "scale=2; ($END - $START) / $n" | bc -l`
 		if [[ $o == "dc" ]] || [[ $oe == "qdc" ]] || [[ $oe =~ "decompress" ]]; then
 			echo "### $p/$or:	$DIFF seconds"
 		else
@@ -98,5 +137,5 @@ for o in $MODES; do
 
 	# Reset effective MODE
 	unset oe
-	done
-done
+	done			# END PROGRAMS
+done				# END MODES
