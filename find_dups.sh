@@ -30,21 +30,27 @@
 # 	xargs -I'{}' -n1 find "$DIR" -type f -size '{}'c -print0  | \
 #	xargs -0 md5sum | uniq -w32 -D 
 #
-if [ ! -d "$2" ]; then
-	echo "Usage: `basename $0` [smart|brute] [dir]"
+_help() {
+	echo "Usage: `basename $0` [smart|brute] [directories]"
 	exit 1
+}
+
+if [ ! -d "$2" ]; then
+	_help
 else
-	DIR="$2"
+	MODE=$1
+	shift
+	DIRS=$@
 fi
 
 TEMP=`mktemp`
 trap "rm -f $TEMP $TEMP.fallout $TEMP.fallout.md5 $TEMP.fallout.dup; exit" EXIT INT TERM HUP
 
-case $1 in
+case $MODE in
 	smart)
 	BEGIN=`date +%s`
 	printf "### Gather size & name of all files... "
-	find "$DIR" -type f -exec stat -c %s:%n '{}' + > $TEMP
+	find $DIRS -type f -exec stat -c %s:%n '{}' + > $TEMP
 	cat "$TEMP" | wc -l					# No UUOC here, but we don't want the leading spaces from wc(1)
 	
 	printf "### Gather files of the same size... "
@@ -57,7 +63,7 @@ case $1 in
 	awk -F: '{print $2}' "$TEMP".fallout | while read f; do
 		md5sum "$f" >> "$TEMP".fallout.md5
 	done
-	cat "$TEMP".fallout.md5 | wc -l
+	cat "$TEMP".fallout.md5 2>/dev/null | wc -l		# Ignore a missing fallout.md5 if no dupes are found.
 	
 	# Duplicate files, if any
 	echo
@@ -79,7 +85,7 @@ case $1 in
 
 	brute)
 	BEGIN=`date +%s`
-	find "$DIR" -type f -exec md5sum '{}' + > "$TEMP"
+	find $DIRS -type f -exec md5sum '{}' + > "$TEMP"
 	sort -k1 $TEMP | uniq -w32 -D	> "$TEMP".dup		# Print _all_ duplicate lines
 
 	echo
@@ -92,7 +98,6 @@ case $1 in
 	;;
 
 	*)
-	echo "Usage: `basename $0` [smart|brute] [dir]"
-	exit 1
+	_help
 	;;
 esac
