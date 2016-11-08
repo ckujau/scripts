@@ -15,6 +15,9 @@
 # Lzturbo library: world's fastest compression library
 # https://sites.google.com/site/powturbo/home/benchmark
 #
+# Packbench
+# https://martin-steigerwald.de/computer/programme/packbench/
+#
 # FIXME:
 # * brotli understands -q[0..99], so maybe we can employ a simple mapping
 #   scheme here? E.g. "gzip -1c" ~ "brotli -q10"? But before we do this,

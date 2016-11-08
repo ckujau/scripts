@@ -5,6 +5,10 @@
 # Find duplicate files in a directory. That is, files
 # with duplicate content.
 #
+# *** Oh well, this whole script could've been avoided, because the
+# *** problem had already been solved by a smarter person:
+# *** https://github.com/adrianlopezroche/fdupes
+#
 # ----
 # Benchmark over 2519 files:
 # $ find_dups.sh .
