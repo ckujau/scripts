@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c)2013 Christian Kujau <lists@nerdbynature.de>
+# (c) 2013, Christian Kujau <lists@nerdbynature.de>
 #
 # Generate checksums of files and store them
 # via Extended Attributes
@@ -15,8 +15,8 @@
 # We could use "shasum", which comes with most Perl installations and
 # should be available on most systems. However, being Perl it's slower
 # than its C alternatives (openssl, coreutils).
-# Here are some actual numbers to back this up (generating the SHA1
-# checksum of a 1 MB file over 100 runs:
+#
+# Here is each tool generating the SHA1 checksum of a 1 MB file over 100 runs:
 #  shasum COUNT: 100 TIME: 38 seconds		- perl
 # openssl COUNT: 100 TIME:  7 seconds		- openssl
 # sha1sum COUNT: 100 TIME:  1 seconds		- coreutils
@@ -25,7 +25,11 @@
 # each operating system anyway, we'll have different routines for
 # checksums as well.
 #
-DIGEST="sha256"			# sha1, sha224, sha256, sha384, sha512
+# FIXME:
+# - support other message digest algorithms (rmd160, sha3, ...)
+# - support other checksum toolsets (coreutils, openssl, rhash)
+#
+DIGEST="md5"			# md5, sha1, sha256, sha512
 
 # Adjust if needed
 PATH=/bin:/usr/bin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
@@ -34,20 +38,22 @@ print_usage()
 {
 	echo "Usage: `basename $0` [get]       [file]"
 	echo "       `basename $0` [set]       [file]"
+	echo "       `basename $0` [get-set]   [file]"
 	echo "       `basename $0` [check-set] [file]"
 	echo "       `basename $0` [check]     [file]"
 	echo "       `basename $0` [remove]    [file]"
+	echo ""
+	echo "*   get-set - sets a new checksum if none is found, print checksum otherwise."
+	echo "* check-set - sets a new checksum if none is found, verify checksum otherwise."
 }
 
-if [ $# -ne 2 ] || [ ! -f "$2" ]; then
+if [ $# -ne 2 -o ! -f "$2" ]; then
 	print_usage
 	exit 1
 else
 	  ACTION="$1"
 	    FILE="$2"
-	# When setting EAs, we don't want to store the full pathname, only the filename
-	BASENAME="`basename "$FILE"`"
-	  OS="`uname -s`"
+	  OS=$(uname -s)
 fi
 
 # Print, exit if necessary
@@ -76,8 +82,7 @@ case "$OS" in
 	;;
 
 	FreeBSD)
-	# FreeBSD doesn't have a lot of options. Our default (sha256) should be
-	# available though.
+	# FreeBSD 10 comes with: md5, sha1, sha256, sha512
 	PROGRAM="$DIGEST -q"
 	;;
 
@@ -91,7 +96,7 @@ case $ACTION in
 	get)
 	case "$OS" in
 		Darwin)
-		xattr -l -p user.checksum."$DIGEST" "$FILE"
+		xattr -l -p user.checksum."$DIGEST" -- "$FILE" 2>/dev/null
 		;;
 
 		FreeBSD)
@@ -103,62 +108,58 @@ case $ACTION in
 		# by your distribution.
 		# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=520659
 		# https://bugzilla.redhat.com/show_bug.cgi?id=660619
-		getfattr --absolute-names --name user.checksum."$DIGEST" "$FILE" | grep "^user.checksum"
+		getfattr --absolute-names --name user.checksum."$DIGEST" -- "$FILE" 2>/dev/null | grep "^user.checksum"
 		;;
 
 		SunOS)
-		runat "$FILE" cat user.checksum."$DIGEST"
+		runat "$FILE" cat user.checksum."$DIGEST" 2>/dev/null
 		;;
 	esac
 
 	# Successful?
-	[ $? = 0 ] || do_log "ERROR: failed to get EA for FILE $FILE!" 1
+	[ $? = 0 ] || do_log "ERROR: failed to get user.checksum."$DIGEST" for FILE $FILE!" 1
 	;;
 
 ####### SET
 	set)
-	CWD=`pwd`
-	cd "`dirname "$FILE"`" || \
-		do_log "ERROR: failed to cd into `dirname "$FILE"`! (FILE: $FILE)" 1
-
 	echo "Setting user.checksum."$DIGEST" on "$FILE"..."
 
 	case "$OS" in
 		Darwin)
-		xattr -w user.checksum."$DIGEST" "`$PROGRAM "$BASENAME"`" "$BASENAME"
+		SUM=$($PROGRAM -- "$FILE" | awk '{print $1}')
+		xattr -w user.checksum."$DIGEST" $SUM "$FILE"
 		;;
 
 		FreeBSD)
 		;;
 
 		Linux)
-		setfattr --name user.checksum."$DIGEST" --value "`$PROGRAM "$BASENAME"`" "$BASENAME"
+		SUM=$($PROGRAM -- "$FILE" | awk '{print $1}')
+		setfattr --name user.checksum."$DIGEST" --value $SUM -- "$FILE"
 		;;
 
 		SunOS)
-		runat "$FILE" "echo \"`$PROGRAM "$FILE"` "$BASENAME"\" > user.checksum."$DIGEST""
+		SUM=$($PROGRAM -- "$FILE")
+		runat "$FILE" "echo $SUM > user.checksum."$DIGEST""
 		;;
 	esac
 
 	# Successful?
-	[ $? = 0 ] || do_log "ERROR: failed to set EA for FILE $FILE!" 1
-
-	# Go back to where we came from
-	cd "$CWD"
+	[ $? = 0 ] || do_log "ERROR: failed to set user.checksum."$DIGEST" for FILE $FILE!" 1
 	;;
 
-####### CHECK-SET
-	check-set)
+####### GET-SET)
+	get-set)
 	case "$OS" in
 		Darwin)
-		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '{print $1}'`
+		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" -- "$FILE" 2>/dev/null | awk '{print $1}'`
 		;;
 
 		FreeBSD)
 		;;
 
 		Linux)
-		CHECKSUM_S=`getfattr --absolute-names --name user.checksum."$DIGEST" --only-values "$FILE" | awk '{print $1}'`
+		CHECKSUM_S=`getfattr --absolute-names --name user.checksum."$DIGEST" --only-values -- "$FILE" 2>/dev/null | awk '{print $1}'`
 		;;
 
 		SunOS)
@@ -167,12 +168,41 @@ case $ACTION in
 	esac
 	
 	# Did we find a checksum?
-	if [ -z "$CHECKSUM_S" ]; then
+	if [ -n "$CHECKSUM_S" ]; then
+		# Checksum found
+		"$0" get "$FILE"
+	else
 		# No checksum found
 		"$0" set "$FILE"
-	else
+	fi
+	;;
+	
+####### CHECK-SET
+	check-set)
+	case "$OS" in
+		Darwin)
+		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" -- "$FILE" 2>/dev/null | awk '{print $1}'`
+		;;
+
+		FreeBSD)
+		;;
+
+		Linux)
+		CHECKSUM_S=`getfattr --absolute-names --name user.checksum."$DIGEST" --only-values -- "$FILE" 2>/dev/null | awk '{print $1}'`
+		;;
+
+		SunOS)
+		CHECKSUM_S=`runat "$FILE" cat user.checksum."$DIGEST" 2>/dev/null`
+		;;
+	esac
+	
+	# Did we find a checksum?
+	if [ -n "$CHECKSUM_S" ]; then
 		# Checksum found
-		do_log "INFO: checksum found for $FILE, not setting a new checksum."
+		"$0" check "$FILE"
+	else
+		# No checksum found
+		"$0" set "$FILE"
 	fi
 	;;
 
@@ -181,49 +211,51 @@ case $ACTION in
 	case "$OS" in
 		Darwin)
 		# Retrieve stored checksum
-		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '{print $1}'`
+		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" -- "$FILE" 2>/dev/null | awk '{print $1}'`
 		;;
 
 		FreeBSD)
 		;;
 
 		Linux)
-		CHECKSUM_S=`getfattr --absolute-names --name user.checksum."$DIGEST" --only-values "$FILE" | awk '{print $1}'`
+		CHECKSUM_S=`getfattr --absolute-names --name user.checksum."$DIGEST" --only-values -- "$FILE" 2>/dev/null | awk '{print $1}'`
 		;;
 
 		SunOS)
-		CHECKSUM_S=`runat "$FILE" cat user.checksum."$DIGEST" | awk '{print $1}'`
+		CHECKSUM_S=`runat "$FILE" cat user.checksum."$DIGEST" 2>/dev/null | awk '{print $1}'`
 		;;
 	esac
 
 	# Bail out if there is no checksum to compare
-	[ -z "$CHECKSUM_S" ] && do_log "ERROR: failed to get EA for FILE $FILE!" 1
+	[ -z "$CHECKSUM_S" ] && do_log "ERROR: failed to get user.checksum."$DIGEST" for FILE $FILE!" 1
 
 	# Calculate current checksum
-	CHECKSUM_C=`$PROGRAM "$FILE" | awk '{print $1}'` || \
+	CHECKSUM_C=`$PROGRAM -- "$FILE" | awk '{print $1}'` || \
 		do_log "ERROR: failed to calculate checksum for FILE $FILE!" 1
 
 	# Let's compare these two. Set DEBUG=1 to get more verbose output.
 	if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
 		printf "FILE: $FILE - OK"
 		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+		true
 	else
 		printf "FILE: $FILE - FAILED"
 		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+		false
 	fi
 	;;
 
 	remove)
 	case "$OS" in
 		Darwin)
-		xattr -d user.checksum."$DIGEST" "$FILE"
+		xattr -d user.checksum."$DIGEST" -- "$FILE"
 		;;
 
 		FreeBSD)
 		;;
 
 		Linux)
-		setfattr --remove user.checksum."$DIGEST" "$FILE"
+		setfattr --remove user.checksum."$DIGEST" -- "$FILE"
 		;;
 
 		SunOS)
