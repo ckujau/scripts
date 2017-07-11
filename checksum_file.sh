@@ -1,25 +1,15 @@
 #!/bin/sh
 #
-# (c) 2013, Christian Kujau <lists@nerdbynature.de>
+# (c)2013 Christian Kujau <lists@nerdbynature.de>
 #
 # Generate checksums of files and store them
 # via Extended Attributes
 #
 # == Requirements ==
-#  Darwin: gsha256sum from GNU/coreutils
-# FreeBSD: /sbin/sha256
-#   Linux: sha256sum from GNU/coreutils
-# Solaris: digest, runat from SUNWcsu
-#
-# === Notes ===
-# We could use "shasum", which comes with most Perl installations and
-# should be available on most systems. However, being Perl it's slower
-# than its C alternatives (openssl, coreutils).
-#
-# Here is each tool generating the SHA1 checksum of a 1 MB file over 100 runs:
-#  shasum COUNT: 100 TIME: 38 seconds		- perl
-# openssl COUNT: 100 TIME:  7 seconds		- openssl
-# sha1sum COUNT: 100 TIME:  1 seconds		- coreutils
+#  Darwin: /sbin/md5 or openssl
+# FreeBSD: /sbin/{md5,sha256}
+#   Linux: md5sum or sha256sum from GNU/coreutils
+# Solaris: digest(1) and runat(1) from SUNWcsu
 #
 # As we're going to have different routines for setting/getting EAs for
 # each operating system anyway, we'll have different routines for
@@ -32,7 +22,7 @@
 DIGEST="md5"			# md5, sha1, sha256, sha512
 
 # Adjust if needed
-PATH=/bin:/usr/bin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
+PATH=/bin:/usr/bin:/sbin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
 
 print_usage()
 {
@@ -65,13 +55,44 @@ echo "$1"
 # Determine the program to generate the digest
 case "$OS" in
 	Darwin)
-	# For now let's just assume that GNU coreutils are installed.
-	# It's also by far much faster than its perl or openssl alternatives.
-	PROGRAM=g${DIGEST}sum
+	# On a standard MacOS installation, we have the following programs installed:
+	#
+	# /sbin/md5           - a C binary
+	# /usr/bin/shasum     - a Perl wrapper to pick the correct shasum script
+	# /usr/bin/shasum5.16 - Calculate the SHA1 hash with Perl 5.16
+	# /usr/bin/shasum5.18 - Calculate the SHA1 hash with Perl 5.18
+	#
+	# The C binary is obviously the fastest and if our DIGEST is set to md5, we
+	# will fall back to this one.
+	# If we really want to create SHA checksums, we want to use the fastest tool.
+	# As a simple benchmark, trying to calculate the SHA-1 checksum of a 5 MB file
+	# for 1000 times gave the following results:
+	#
+	# shasum	- 72 seconds
+	# shasum5.16	- 88 seconds
+	# shasum5.18	- 68 seconds
+	# gsha1sum	- 28 seconds
+	# openssl sha1	- 26 seconds *
+	#
+	# For comparison, when using MD5:
+	# md5		- 21 seconds *
+	# gmd5sum	- 22 seconds
+	# openssl md5	- 25 seconds
+	#
+	# And so, we will try to choose the fastest program for the job:
+	case $DIGEST in
+		md5)
+		PROGRAM=${DIGEST}
+		;;
+
+		sha*)
+		openssl dgst -${DIGEST}
+		;;
+	esac
 	;;
 
 	Linux)
-	# GNU coreutils will be installed on most Linux distributions.
+	# GNU/coreutils should be installed on most Linux distributions.
 	# It's also by far much faster than its perl or openssl alternatives.
 	PROGRAM=${DIGEST}sum
 	;;
@@ -96,7 +117,7 @@ case $ACTION in
 	get)
 	case "$OS" in
 		Darwin)
-		xattr -l -p user.checksum."$DIGEST" -- "$FILE" 2>/dev/null
+		xattr -l -p user.checksum."$DIGEST" "$FILE" 2>/dev/null
 		;;
 
 		FreeBSD)
@@ -126,7 +147,7 @@ case $ACTION in
 
 	case "$OS" in
 		Darwin)
-		SUM=$($PROGRAM -- "$FILE" | awk '{print $1}')
+		SUM=$($PROGRAM "$FILE" | awk '{print $NF}')
 		xattr -w user.checksum."$DIGEST" $SUM "$FILE"
 		;;
 
@@ -152,7 +173,7 @@ case $ACTION in
 	get-set)
 	case "$OS" in
 		Darwin)
-		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" -- "$FILE" 2>/dev/null | awk '{print $1}'`
+		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '{print $1}'`
 		;;
 
 		FreeBSD)
@@ -181,7 +202,7 @@ case $ACTION in
 	check-set)
 	case "$OS" in
 		Darwin)
-		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" -- "$FILE" 2>/dev/null | awk '{print $1}'`
+		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '{print $1}'`
 		;;
 
 		FreeBSD)
@@ -210,28 +231,26 @@ case $ACTION in
 	check)
 	case "$OS" in
 		Darwin)
-		# Retrieve stored checksum
-		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" -- "$FILE" 2>/dev/null | awk '{print $1}'`
+		CHECKSUM_C=$($PROGRAM "$FILE" | awk '{print $NF}')
+		CHECKSUM_S=`xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '{print $1}'`
 		;;
 
 		FreeBSD)
 		;;
 
 		Linux)
+		CHECKSUM_C=$($PROGRAM -- "$FILE" | awk '{print $1}')
 		CHECKSUM_S=`getfattr --absolute-names --name user.checksum."$DIGEST" --only-values -- "$FILE" 2>/dev/null | awk '{print $1}'`
 		;;
 
 		SunOS)
+		CHECKSUM_C=$($PROGRAM -- "$FILE")
 		CHECKSUM_S=`runat "$FILE" cat user.checksum."$DIGEST" 2>/dev/null | awk '{print $1}'`
 		;;
 	esac
 
 	# Bail out if there is no checksum to compare
-	[ -z "$CHECKSUM_S" ] && do_log "ERROR: failed to get user.checksum."$DIGEST" for FILE $FILE!" 1
-
-	# Calculate current checksum
-	CHECKSUM_C=`$PROGRAM -- "$FILE" | awk '{print $1}'` || \
-		do_log "ERROR: failed to calculate checksum for FILE $FILE!" 1
+	[ -z "$CHECKSUM_C" ] || [ -z "$CHECKSUM_S" ] && do_log "ERROR: failed to calculate/get the $DIGEST checksum for FILE $FILE!" 1
 
 	# Let's compare these two. Set DEBUG=1 to get more verbose output.
 	if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
@@ -248,7 +267,7 @@ case $ACTION in
 	remove)
 	case "$OS" in
 		Darwin)
-		xattr -d user.checksum."$DIGEST" -- "$FILE"
+		xattr -d user.checksum."$DIGEST" "$FILE"
 		;;
 
 		FreeBSD)

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c)2014 Christian Kujau <christian@nerdbynature.de>
+# (c)2014 Christian Kujau <lists@nerdbynature.de>
 # Tmpfs vs Ramfs vs Ramdisk
 #
 DIR_TMPFS=/mnt/tmpfs
