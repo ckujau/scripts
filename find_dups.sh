@@ -5,9 +5,10 @@
 # Find duplicate files in a directory. That is, files
 # with duplicate content.
 #
-# *** Oh well, this whole script could've been avoided, because the
-# *** problem had already been solved by a smarter person:
-# *** https://github.com/adrianlopezroche/fdupes
+# Note: this problem had been solved already by a smarter person with
+# https://github.com/adrianlopezroche/fdupes, but this program may
+# not be installed or available on all platforms. This shell version
+# may still be useful after all :-)
 #
 # ----
 # Benchmark over 2519 files:
@@ -58,13 +59,13 @@ case $MODE in
 	cat "$TEMP" | wc -l					# No UUOC here, but we don't want the leading spaces from wc(1)
 	
 	printf "### Gather files of the same size... "
-	awk -F: '{print $1}' $TEMP | sort | uniq -d | while read s; do
+	cut -d: -f1 $TEMP | sort | uniq -d | while read s; do
 		grep ^"$s" $TEMP
 	done | sort -u > "$TEMP".fallout			# The "sort -u" at the end is crucial :)
 	cat "$TEMP".fallout | wc -l
 
 	printf "### Calculate the md5 checksums... "
-	awk -F: '{print $2}' "$TEMP".fallout | while read f; do
+	cut -d: -f2 "$TEMP".fallout | while read f; do
 		md5sum "$f" >> "$TEMP".fallout.md5
 	done
 	cat "$TEMP".fallout.md5 2>/dev/null | wc -l		# Ignore a missing fallout.md5 if no dupes are found.
@@ -72,7 +73,7 @@ case $MODE in
 	# Duplicate files, if any
 	echo
 	echo "Duplicate files:"
-	awk '{print $1}' "$TEMP".fallout.md5 2>/dev/null | sort | uniq -d | while read d; do
+	cut -d\  -f1 "$TEMP".fallout.md5 2>/dev/null | sort | uniq -d | while read d; do
 		grep ^"$d" "$TEMP".fallout.md5
 		echo
 	done | tee "$TEMP".fallout.dup
