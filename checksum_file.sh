@@ -115,9 +115,10 @@ esac
 case $ACTION in
 ####### GET
 	get)
+	printf "user.checksum."$DIGEST": "					# Same formatting for all systems
 	case "$OS" in
 		Darwin)
-		xattr -l -p user.checksum."$DIGEST" "$FILE" 2>/dev/null
+		xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null || echo
 		;;
 
 		FreeBSD)
@@ -129,7 +130,7 @@ case $ACTION in
 		# by your distribution.
 		# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=520659
 		# https://bugzilla.redhat.com/show_bug.cgi?id=660619
-		getfattr --absolute-names --name user.checksum."$DIGEST" -- "$FILE" 2>/dev/null | grep "^user.checksum"
+		getfattr --only-values --name user.checksum."$DIGEST" -- "$FILE" 2>/dev/null | grep '[[:alnum:]]'
 		;;
 
 		SunOS)
