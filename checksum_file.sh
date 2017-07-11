@@ -191,10 +191,10 @@ case $ACTION in
 	
 	# Did we find a checksum?
 	if [ -n "$CHECKSUM_S" ]; then
-		# Checksum found
-		"$0" get "$FILE"
+		# Print out checksum
+		echo "user.checksum."$DIGEST": $CHECKSUM_S"
 	else
-		# No checksum found
+		# Set checksum
 		"$0" set "$FILE"
 	fi
 	;;
@@ -220,10 +220,10 @@ case $ACTION in
 	
 	# Did we find a checksum?
 	if [ -n "$CHECKSUM_S" ]; then
-		# Checksum found
+		# Verify checksum
 		"$0" check "$FILE"
 	else
-		# No checksum found
+		# Set checksum
 		"$0" set "$FILE"
 	fi
 	;;
