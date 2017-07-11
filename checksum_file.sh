@@ -18,8 +18,9 @@
 # for calculating checksums. We need to specify the digest algorithm though.
 #
 # TODO:
-# - support other message digest algorithms (rmd160, sha3, ...)
-# - support other checksum toolsets (coreutils, openssl, rhash)
+# - Support other message digest algorithms (rmd160, sha3, ...)
+# - Support other checksum toolsets (coreutils, openssl, rhash)
+# - Or rewrite this whole thing in Python, for portability's sake? (hashlib, os/xattr)
 #
 DIGEST="md5"			# md5, sha1, sha256, sha512
 
@@ -229,6 +230,7 @@ case $ACTION in
 	# Did we find a checksum?
 	if [ -n "$CHECKSUM_S" ]; then
 		# Verify checksum
+		# FIXME: we have one superfluous "get" routine here :-\
 		"$0" check "$FILE"
 	else
 		# Set checksum
