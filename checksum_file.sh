@@ -111,6 +111,7 @@ case "$OS" in
 
 	*)
 	do_log "We don't support "$OS", yet :-(" 1
+	;;
 esac
 
 # Main routines, with switches for each OS
@@ -120,11 +121,11 @@ case $ACTION in
 	printf "user.checksum."$DIGEST": "					# Same formatting for all systems
 	case "$OS" in
 		Darwin)
-		xattr -p user.checksum."$DIGEST" "$FILE" 2>/dev/null || echo
+		xattr  -p user.checksum."$DIGEST" "$FILE" 2>/dev/null || echo
 		;;
 
 		FreeBSD)
-		pxattr -n user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '/user.checksum/ {print $NF}' | grep '[[:alnum:]]' || echo
+		pxattr -n user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '/user.checksum/ {print $NF}' || echo
 		;;
 
 		Linux)
@@ -133,16 +134,16 @@ case $ACTION in
 		# by your distribution.
 		# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=520659
 		# https://bugzilla.redhat.com/show_bug.cgi?id=660619
-		getfattr --only-values --name user.checksum."$DIGEST" -- "$FILE" 2>/dev/null | grep '[[:alnum:]]'
+		getfattr --only-values --name user.checksum."$DIGEST" -- "$FILE" 2>/dev/null | grep '[[:alnum:]]' || echo
 		;;
 
 		SunOS)
-		runat "$FILE" cat user.checksum."$DIGEST" 2>/dev/null
+		runat "$FILE" cat user.checksum."$DIGEST" 2>/dev/null || echo
 		;;
 	esac
 
 	# Successful?
-	[ $? = 0 ] || do_log "ERROR: failed to get user.checksum."$DIGEST" for FILE $FILE!" 1
+	[ $? = 0 ] || do_log "ERROR: failed to get user.checksum."$DIGEST" for file $FILE!" 1
 	;;
 
 ####### SET
@@ -151,28 +152,28 @@ case $ACTION in
 
 	case "$OS" in
 		Darwin)
-		SUM=$($PROGRAM "$FILE" | awk '{print $NF}')
-		xattr -w user.checksum."$DIGEST" $SUM "$FILE"
+		CHECKSUM_C=$($PROGRAM "$FILE" | awk '{print $NF}')
+		xattr -w user.checksum."$DIGEST" "$CHECKSUM_C" "$FILE"
 		;;
 
 		FreeBSD)
-		SUM=$($PROGRAM -- "$FILE")
-		pxattr -n user.checksum."$DIGEST" -v $SUM "$FILE"
+		CHECKSUM_C=$($PROGRAM -- "$FILE")
+		pxattr -n user.checksum."$DIGEST" -v "$CHECKSUM_C" "$FILE"
 		;;
 
 		Linux)
-		SUM=$($PROGRAM -- "$FILE" | awk '{print $1}')
-		setfattr --name user.checksum."$DIGEST" --value $SUM -- "$FILE"
+		CHECKSUM_C=$($PROGRAM -- "$FILE" | awk '{print $1}')
+		setfattr --name user.checksum."$DIGEST" --value "$CHECKSUM_C" -- "$FILE"
 		;;
 
 		SunOS)
-		SUM=$($PROGRAM -- "$FILE")
-		runat "$FILE" "echo $SUM > user.checksum."$DIGEST""
+		CHECKSUM_C=$($PROGRAM -- "$FILE")
+		runat "$FILE" "echo "$CHECKSUM_C" > user.checksum."$DIGEST""
 		;;
 	esac
 
 	# Successful?
-	[ $? = 0 ] || do_log "ERROR: failed to set user.checksum."$DIGEST" for FILE $FILE!" 1
+	[ $? = 0 ] || do_log "ERROR: failed to set user.checksum."$DIGEST" for file $FILE!" 1
 	;;
 
 ####### GET-SET)
@@ -260,7 +261,7 @@ case $ACTION in
 	esac
 
 	# Bail out if there is no checksum to compare
-	[ -z "$CHECKSUM_C" ] || [ -z "$CHECKSUM_S" ] && do_log "ERROR: failed to calculate/get the $DIGEST checksum for FILE $FILE!" 1
+	[ -z "$CHECKSUM_C" ] || [ -z "$CHECKSUM_S" ] && do_log "ERROR: failed to calculate/get the $DIGEST checksum for file $FILE!" 1
 
 	# Let's compare these two. Set DEBUG=1 to get more verbose output.
 	if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
