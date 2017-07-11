@@ -7,22 +7,24 @@
 #
 # == Requirements ==
 #  Darwin: /sbin/md5 or openssl
-# FreeBSD: /sbin/{md5,sha256}
+# FreeBSD: /sbin/{md5,sha256} and sysutils/pxattr
 #   Linux: md5sum or sha256sum from GNU/coreutils
 # Solaris: digest(1) and runat(1) from SUNWcsu
+#	   We will also need at least an XPG4 or Korn shell on older Solaris
+#	   systems, as older shells may not understand command substitution
+#	   with parentheses, as required by POSIX.
 #
-# As we're going to have different routines for setting/getting EAs for
-# each operating system anyway, we'll have different routines for
-# checksums as well.
+# Each operating system has its own routines for setting/getting EAs and also
+# for calculating checksums. We need to specify the digest algorithm though.
 #
-# FIXME:
+# TODO:
 # - support other message digest algorithms (rmd160, sha3, ...)
 # - support other checksum toolsets (coreutils, openssl, rhash)
 #
 DIGEST="md5"			# md5, sha1, sha256, sha512
 
 # Adjust if needed
-PATH=/bin:/usr/bin:/sbin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
+PATH=/bin:/usr/bin:/sbin:/usr/local/bin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
 
 print_usage()
 {
@@ -91,6 +93,11 @@ case "$OS" in
 	esac
 	;;
 
+	FreeBSD)
+	# FreeBSD 10 comes with: md5, sha1, sha256, sha512
+	PROGRAM="$DIGEST -q"
+	;;
+
 	Linux)
 	# GNU/coreutils should be installed on most Linux distributions.
 	# It's also by far much faster than its perl or openssl alternatives.
@@ -100,11 +107,6 @@ case "$OS" in
 	SunOS)
 	# SUNWcsu should be available. If it's not, we'd have much bigger problems.
 	PROGRAM="digest -a $DIGEST"
-	;;
-
-	FreeBSD)
-	# FreeBSD 10 comes with: md5, sha1, sha256, sha512
-	PROGRAM="$DIGEST -q"
 	;;
 
 	*)
@@ -122,6 +124,7 @@ case $ACTION in
 		;;
 
 		FreeBSD)
+		pxattr -n user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '/user.checksum/ {print $NF}' | grep '[[:alnum:]]' || echo
 		;;
 
 		Linux)
@@ -153,6 +156,8 @@ case $ACTION in
 		;;
 
 		FreeBSD)
+		SUM=$($PROGRAM -- "$FILE")
+		pxattr -n user.checksum."$DIGEST" -v $SUM "$FILE"
 		;;
 
 		Linux)
@@ -178,6 +183,7 @@ case $ACTION in
 		;;
 
 		FreeBSD)
+		CHECKSUM_S=`pxattr -n user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '/user.checksum/ {print $NF}'`
 		;;
 
 		Linux)
@@ -207,6 +213,7 @@ case $ACTION in
 		;;
 
 		FreeBSD)
+		CHECKSUM_S=`pxattr -n user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '/user.checksum/ {print $NF}'`
 		;;
 
 		Linux)
@@ -237,6 +244,8 @@ case $ACTION in
 		;;
 
 		FreeBSD)
+		CHECKSUM_C=$($PROGRAM -- "$FILE")
+		CHECKSUM_S=`pxattr -n user.checksum."$DIGEST" "$FILE" 2>/dev/null | awk '/user.checksum/ {print $NF}'`
 		;;
 
 		Linux)
@@ -272,6 +281,7 @@ case $ACTION in
 		;;
 
 		FreeBSD)
+		pxattr -x user.checksum."$DIGEST" "$FILE"
 		;;
 
 		Linux)
