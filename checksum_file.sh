@@ -267,12 +267,12 @@ case $ACTION in
 
 	# Let's compare these two. Set DEBUG=1 to get more verbose output.
 	if [ "$CHECKSUM_S" = "$CHECKSUM_C" ]; then
-		printf "FILE: $FILE - OK"
-		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+		echo "FILE: $FILE - OK"
+		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)"
 		true
 	else
-		printf "FILE: $FILE - FAILED"
-		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)" || echo
+		echo "FILE: $FILE - FAILED"
+		[ "$DEBUG" = 1 ] && echo " ($DIGEST STORED: $CHECKSUM_S  CALCULATED: $CHECKSUM_C)"
 		false
 	fi
 	;;
