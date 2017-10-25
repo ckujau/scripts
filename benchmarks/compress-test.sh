@@ -50,7 +50,7 @@ _report() {
 	echo
 
 	echo "### Smallest size:"
-	grep -v /dc "$REPORT" | sort -nrk5
+	grep -v /dc "$REPORT" | sort -nrk6
 	echo
 
 	echo "### Fastest decompressor:"
