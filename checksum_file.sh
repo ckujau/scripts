@@ -2,8 +2,7 @@
 #
 # (c)2013 Christian Kujau <lists@nerdbynature.de>
 #
-# Generate checksums of files and store them
-# via Extended Attributes
+# Generate checksums of files and store them via Extended Attributes
 #
 # == Requirements ==
 #  Darwin: /sbin/md5 or openssl
@@ -40,7 +39,7 @@ print_usage()
 	echo "* check-set - sets a new checksum if none is found, verify checksum otherwise."
 }
 
-if [ $# -ne 2 -o ! -f "$2" ]; then
+if [ $# -ne 2 ] || [ ! -f "$2" ]; then
 	print_usage
 	exit 1
 else
