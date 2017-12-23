@@ -24,7 +24,7 @@ cat <<XX
 <pre>
 XX
 
-echo -n '<span class="comment">'
+printf '<span class="comment">'
 
 first=1
 diffseen=0
@@ -51,7 +51,7 @@ while [ $? -eq 0 ]; do
 
 		if [ $diffseen -eq 0 ]; then
 			diffseen=1
-			echo -n '</span>'
+			printf '</span>'
 		else
 			if [ $lastonly -eq 0 ]; then
 				echo "</div>"
@@ -67,7 +67,7 @@ while [ $? -eq 0 ]; do
 		cls='diff'
 		if [ $diffseen -eq 0 ]; then
 			diffseen=1
-			echo -n '</span>'
+			printf '</span>'
 		else
 			echo "</div>"
 		fi
@@ -110,16 +110,16 @@ while [ $? -eq 0 ]; do
 
 	# Output the line.
 	if [ "$cls" ]; then
-		echo -n '<span class="'${cls}'">'${s}'</span>'
+		printf '<span class="'${cls}'">'${s}'</span>'
 	else
-		echo -n ${s}
+		printf ${s}
 	fi
 	read -r s
 done
 IFS=$OIFS
 
 if [ $diffseen -eq 0  &&  $onlyseen -eq 0 ]; then 
-	echo -n '</span>'
+	printf '</span>'
 else
 	echo "</div>"
 fi

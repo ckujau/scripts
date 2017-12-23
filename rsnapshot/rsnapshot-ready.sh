@@ -24,7 +24,7 @@ for d in $@; do
 	# check if we're mounted
 	mount | grep "$DIR type" > /dev/null
 	if [ $? = 0 ]; then
-		$DEBUG touch "$FILE"
+		$DEBUG date > "$FILE"
 	else
 		# remove FILE if a single mountpoint was not mounted and bail out
 		$DEBUG rm -f "$FILE"

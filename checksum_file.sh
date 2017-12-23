@@ -2,8 +2,7 @@
 #
 # (c)2013 Christian Kujau <lists@nerdbynature.de>
 #
-# Generate checksums of files and store them
-# via Extended Attributes
+# Generate checksums of files and store them via Extended Attributes
 #
 # == Requirements ==
 #  Darwin: /sbin/md5 or openssl

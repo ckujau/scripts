@@ -1,4 +1,4 @@
-#!/usr/bin/env ksh
+#!/usr/bin/env bash
 #
 # (c)2011 Christian Kujau <lists@nerdbynature.de>
 #
@@ -96,7 +96,8 @@ for o in $MODES; do
 		START=`date +%s`
 
 		# brotli: why can't you have the same options, hm?
-		if [ $p = "brotli" ]; then
+		case $p in
+			brotli|bro)
 			if [ $o = "dc" ]; then
 				or=$o					# Save the original MODE
 				oe="-decompress --input"		# Mind the missing "-"
@@ -106,18 +107,28 @@ for o in $MODES; do
 				or=$o					# Save the original MODE
 				oe="-force --quality $Q --input"	# Mind the missing "-"
 			fi
-		else
+			;;
+
+			zstd|pzstd)
+			# pzstd: suppress the progress bar
+			if [ $p = "zstd" ] || [ $p = "pzstd" ]; then
+				oe=q${o}
+			fi
+			;;
+
+			pixz)
+			# TBD
+			:
+			;;
+
+			*)
 			or=$o						# Save the original MODE
 			oe=$o						# Set effective MODE to $o
-		fi
-
-		# pzstd: suppress the progress bar
-		if [ $p = "zstd" ] || [ $p = "pzstd" ]; then
-			oe=q${o}
-		fi
+			;;
+		esac
 
 		# Repeat n times
-		for n in {1..$RUNS}; do
+		for ((n=1; n<=$RUNS; n++)); do
 		#	echo "### RUN: $n MODE: $o  PROG: $p"
 			# Discard output during decompression
 			if [[ $o == "dc" ]] || [[ $oe == "qdc" ]] || [[ $oe =~ "decompress" ]]; then
