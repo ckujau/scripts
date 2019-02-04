@@ -80,7 +80,7 @@ for c in $CIPHER; do
       # Calculate the average time for one run. Also, reset the error counter.
       b=$(date +%s)
       d=$(echo \( $b - $a \) / $RUNS | bc)
-      [ -z "$ERR" ] && echo "\b$d seconds avg." || unset ERR
+      [ -z "$ERR" ] && printf "\b$d seconds avg." || unset ERR
       n=$((n+1))
     done
   done

@@ -18,24 +18,13 @@
 # Packbench
 # https://martin-steigerwald.de/computer/programme/packbench/
 #
-# FIXME:
-# * brotli understands -q[0..99], so maybe we can employ a simple mapping
-#   scheme here? E.g. "gzip -1c" ~ "brotli -q10"? But before we do this,
-#   we'll have to read up on its documentation first.
-#
-# * zstd supports -[1..22] as compression levels. Should we employ a mapping
-#   scheme here as well? E.g. "gzip -6c" ~ "zstd -10c"?
-#
 PATH=/usr/local/bin:/usr/bin:/bin
 PROGRAMS=${PROGRAMS:-gzip pigz bzip2 pbzip2 xz pxz lzma plzma brotli zstd pzstd}
-MODES=${MODES:-9c 1c dc}			# {1..9}c for most programs
-						# dc for decompression
-# unset me!
-# DEBUG=echo
-
+MODES=${MODES:-9c 1c dc}			# {1..9}c for   compression
+						#      dc for decompression
 _help() {
-	echo "Usage: `basename $0` [-n runs] [-f file]"
-	echo "       `basename $0` [-r results]"
+	echo "Usage: $(basename $0) [-n runs] [-f file]"
+	echo "       $(basename $0) [-r results]"
 	echo
 	echo "Available environment variables that can be set:"
 	echo "PROGRAMS (default: $PROGRAMS)"
@@ -46,15 +35,15 @@ _help() {
 
 _report() {
 	echo "### Fastest compressor:"
-	grep -v /dc "$REPORT" | sort -nk3
+	grep -v /dc ${REPORT} | sort -nk3
 	echo
 
 	echo "### Smallest size:"
-	grep -v /dc "$REPORT" | sort -nrk6
+	grep -v /dc ${REPORT} | sort -nrk6
 	echo
 
 	echo "### Fastest decompressor:"
-	grep    /dc "$REPORT" | sort -nk3
+	grep    /dc ${REPORT} | sort -nk3
 	echo
 	exit $?
 }
@@ -81,75 +70,82 @@ while getopts "n:f:r:" opt; do
 done
 
 # Are we in report mode?
-[ -f "$REPORT" ] && _report
+[ -f "${REPORT}" ] && _report					# The "" are important here!
 
 # Default to one run
 RUNS=${runs:-1}
 
 # Read file into RAM once
-[ -f "$FILE" ] && cat "$FILE" > /dev/null || _help
+[ -f ${FILE} ] && cat ${FILE} > /dev/null || _help
 
-# Iterate through all programs, modes
-for o in $MODES; do
+# Iterate through all modes, programs
+for m in $MODES; do
 	for p in $PROGRAMS; do
-		SIZE1=`ls -go "$FILE" | awk '{print $3}'`
-		START=`date +%s`
+		if ! which ${p} > /dev/null 2>&1; then
+			echo "### Program ${p} not found - skipping."
+			continue
+		fi
+		SIZE1=$(ls -go ${FILE} | awk '{print $3}')
+		START=$(date +%s)
 
-		# brotli: why can't you have the same options, hm?
+		# If all programs had the same options, we would not have to do this.
 		case $p in
 			brotli|bro)
-			if [ $o = "dc" ]; then
-				or=$o					# Save the original MODE
-				oe="-decompress --input"		# Mind the missing "-"
+			if [ $m = "dc" ]; then
+				_cmd(){ ${p} -${m} ${FILE}.${p}    > /dev/null; }
 			else
-				# Sigh...
-				Q=$(echo $o | sed 's/c$//')
-				or=$o					# Save the original MODE
-				oe="-force --quality $Q --input"	# Mind the missing "-"
+				qual=$(echo $m | sed 's/c$//')				# Sigh...
+				_cmd(){ ${p} -q ${qual} -c ${FILE}  > ${FILE}.${p}; }
 			fi
 			;;
 
 			zstd|pzstd)
 			# pzstd: suppress the progress bar
-			if [ $p = "zstd" ] || [ $p = "pzstd" ]; then
-				oe=q${o}
+			if [ $m = "dc" ]; then
+				_cmd(){ ${p} -q${m} ${FILE}.${p}   > /dev/null; }
+			else
+				_cmd(){ ${p} -q${m} ${FILE}        > ${FILE}.${p}; }
 			fi
 			;;
 
 			pixz)
-			# TBD
-			:
+			if [ $m = "dc" ]; then
+				_cmd(){ ${p} -d          -i ${FILE}.${p} -o /dev/null; }
+			else
+				qual=$(echo $m | sed 's/c$//')				# Sigh...
+				_cmd(){ ${p} -k -${qual} -i ${FILE}      -o ${FILE}.${p}; }
+			fi
 			;;
 
 			*)
-			or=$o						# Save the original MODE
-			oe=$o						# Set effective MODE to $o
+			# All the sane programs out there...
+			if [ $m = "dc" ]; then
+				_cmd(){ ${p} -${m} ${FILE}.${p} > /dev/null; }
+			else
+				_cmd(){ ${p} -${m} ${FILE}      > ${FILE}.${p}; }
+			fi
 			;;
 		esac
 
-		# Repeat n times
-		for ((n=1; n<=$RUNS; n++)); do
-		#	echo "### RUN: $n MODE: $o  PROG: $p"
-			# Discard output during decompression
-			if [[ $o == "dc" ]] || [[ $oe == "qdc" ]] || [[ $oe =~ "decompress" ]]; then
-				$DEBUG ${p} -${oe} "$FILE"."$p" > /dev/null
-			else							# Compress
-				$DEBUG ${p} -${oe} "$FILE" > "$FILE"."$p"
-			fi
-		done		# END RUNS
+		# We could move the counter to the outer loop, but then we'd have
+		# to play more tricks with our statistics below.
+		n=0
+		while [ $n -lt $RUNS ]; do
+			_cmd
+			n=$((n+1))
+		done
 
 		# Statistics
-		  END=`date +%s`
-		SIZE2=`ls -go "$FILE"."$p" | awk '{print $3}'`
-		 DIFF=`echo "scale=2; ($END - $START) / $n" | bc -l`
-		if [[ $o == "dc" ]] || [[ $oe == "qdc" ]] || [[ $oe =~ "decompress" ]]; then
-			echo "### $p/$or:	$DIFF seconds"
+		  END=$(date +%s)
+		 DIFF=$(echo "scale=2; ($END - $START) / $n" | bc -l)
+		if [ $m = "dc" ]; then
+			echo "### $p/$m:	$DIFF seconds"
 		else
-			RATIO=`echo "scale=3; 100 - ($SIZE2 / $SIZE1 * 100)" | bc -l`
-			echo "### $p/$or:	$DIFF seconds / $RATIO% smaller "
+			SIZE2=$(ls -go "$FILE"."$p" | awk '{print $3}')			# More portable than stat(1)
+			RATIO=$(echo "scale=3; 100 - ($SIZE2 / $SIZE1 * 100)" | bc -l)
+			echo "### $p/$m:	$DIFF seconds / $RATIO% smaller "
 		fi
 
-	# Reset effective MODE
-	unset oe
 	done			# END PROGRAMS
+	echo
 done				# END MODES
