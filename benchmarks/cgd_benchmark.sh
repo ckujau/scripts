@@ -4,12 +4,11 @@
 # Benchmark for NetBSD/CGD. We'd need something similar for other BSD
 # variants too.
 #
-CIPHERS="aes-cbc aes-xts 3des-cbc blowfish-cbc"
+CIPHERS="aes-cbc aes-xts 3des-cbc blowfish-cbc"	# See cgd(4)
 CGD=cgd3
 
 # unset me!
-# DEBUG="count=1"				# This will still run the tests, but
-						# will only read one byte.
+# DEBUG="count=1"				# Read only one byte, for testing.
 
 # Short circuit into report mode
 if [ "$1" = "report" ] && [ -f "$2" ]; then
@@ -31,8 +30,13 @@ if [ ! -c /dev/r${1} ] || [ -z "$2" ]; then
 	echo "          $(basename $0) report out.txt"
 	exit 1
 else
+	# Note: in BSD, we will use character devices, not block devices. However,
+	# for setting up the CGD, a block device is indeed required. See also:
+	# https://www.freebsd.org/doc/en/books/arch-handbook/driverbasics-block.html
+	# https://www.netbsd.org/docs/kernel/pseudo/
 	DEV="$1"
 	NUM="$2"
+	PRM=$(mktemp -d)		# Where to store our parameter files.
 fi
 
 # RAW
@@ -43,11 +47,16 @@ done
 
 # CGD
 for c in $CIPHERS; do
+	cgdconfig -g -k urandomkey -o ${PRM}/test_${c} $c
+	cgdconfig ${CGD} /dev/${DEV}  ${PRM}/test_${c}
+
+	# Repeat NUM times...
 	for i in $(seq 1 $NUM); do
 		printf "MODE: $c I: $i\t"
-		cgdconfig -g -k urandomkey -o /etc/cgd/test_${c} $c
-		cgdconfig ${CGD} /dev/${DEV} /etc/cgd/test_${c}
 		dd if=/dev/r${CGD}a of=/dev/null bs=1k $DEBUG conv=sync 2>&1 | grep bytes
-		cgdconfig -u /dev/${CGD}a
 	done
+
+	cgdconfig -u /dev/${CGD}a
+	rm -f ${PRM}/test_${c}
 done
+rmdir ${PRM}
