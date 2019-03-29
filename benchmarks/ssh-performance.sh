@@ -13,6 +13,9 @@
 _help() {
 	echo "Usage: $(basename $0) run    [user@][host] [size-in-MB] [runs]"
 	echo "       $(basename $0) report [performance.log] [top]"
+	echo
+	echo "Note: Cipher, MAC and Kex algorithms can also be controlled by"
+	echo "      the CIPHER, MAC and KEX environment variables."
 	exit 1
 }
 
@@ -33,14 +36,9 @@ trap 'rm -f "$TEMP"; exit' EXIT INT TERM HUP
 # | Fedora/20                || OpenSSH 6.3
 # | openSUSE/13.2            || OpenSSH 6.6
 #
-CIPHER="$(ssh -Q cipher)"
-   MAC="$(ssh -Q mac)"
-   KEX="$(ssh -Q kex)"
-
-# DEBUG
-# CIPHER="aes128-ctr aes192-ct aes256-ctr"
-#  MAC="umac-64@openssh.com hmac-sha1-etm@openssh.com"
-#  KEX="diffie-hellman-group-exchange-sha256"
+CIPHER="${CIPHER:-$(ssh -Q cipher)}"
+   MAC="${MAC:-$(ssh -Q mac)}"
+   KEX="${KEX:-$(ssh -Q kex)}"
 
 # Possible combinations
 COMB=$(expr $(echo $CIPHER | awk '{print NF}') \* $(echo $MAC | awk '{print NF}') \* $(echo $KEX | awk '{print NF}'))
@@ -57,13 +55,12 @@ for c in $CIPHER; do
       r=1
 
       printf "$n/$COMB - cipher: $c \t mac: $m \t kex: $k - "
-      [ $RUNS -lt 10 ] && printf " "				# Print an extra space
+#     [ $RUNS -lt 10 ] && printf " "				# Formatting quirk...
 
       a=$(date +%s)
       while [ $r -le $RUNS ]; do
-        printf "$r\b"
+        printf "$r\b" >&2					# We don't need this on stdout
 
-#     sleep 1
         dd if=/dev/zero bs=1024k count="$SIZE" 2>/dev/null | \
           ssh -T -o CheckHostIP=no -o StrictHostKeyChecking=no \
             -o Ciphers="$c" -o MACs="$m" -o KexAlgorithms="$k" "$HOST" "cat > /dev/null" 2>"$TEMP"
@@ -77,10 +74,10 @@ for c in $CIPHER; do
         r=$((r+1))
       done
 
-      # Calculate the average time for one run. Also, reset the error counter.
+      # Calculate the average time for one run; reset the error counter.
       b=$(date +%s)
       d=$(echo \( $b - $a \) / $RUNS | bc)
-      [ -z "$ERR" ] && printf "\b$d seconds avg." || unset ERR
+      [ -z "$ERR" ] && printf "$d seconds avg.\n" || unset ERR
       n=$((n+1))
     done
   done
@@ -89,11 +86,14 @@ done
 
 _filter() {
 #
+# FIXME: is this still needed?
+#
 # The progress meter messed up our log file and we'll remove the control
 # characters again with this ugly sed string.
 # Or, use cat-v:  ... | cat -v | sed 's/1\^H.*\^H//' 
 #
-	grep seconds "$1" | sed 's/[0-9]\x08//g;s/\x08//'
+#	grep seconds "$1" | sed 's/[0-9]\x08//g;s/\x08//'
+	grep seconds "$1"
 }
 
 #
