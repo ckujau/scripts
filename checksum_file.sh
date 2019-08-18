@@ -293,7 +293,9 @@ case ${ACTION} in
 ####### TEST
 	test)
 	# We need a temporary file, even on macOS
-	TEMP=$(mktemp -p . 2>/dev/null || mktemp ./XXXXXXX 2>/dev/null)
+	TEMP=$(mktemp -p . 2>/dev/null || mktemp ./tmp.XXXXXXX 2>/dev/null)
+	trap "rm -f $TEMP" EXIT INT TERM HUP
+
 	if [ ! -f "$TEMP" ]; then
 		do_log "Failed to create temporary file ${TEMP}!" 1
 	else
@@ -301,11 +303,18 @@ case ${ACTION} in
 	fi
 
 	# More, and more elaborate tests needed.
-	for action in get-set check-set check remove get-set get remove check-set remove remove; do
-		printf "### ACTION: ${action}\t\t"
+	for action in get get-set check-set check remove remove check-set remove check; do
+		echo "### ACTION: ${action}"
 		$0 ${action} ${TEMP}
-		echo
+		echo $? && echo
 	done
+
+	echo "### ACTION: set - alter - check"
+	$0 set    ${TEMP}
+	echo "Modifying ${TEMP}..."
+	echo . >> ${TEMP}
+	$0 check  ${TEMP}
+	echo $?
 	;;
 
 ####### HELP
