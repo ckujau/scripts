@@ -33,11 +33,11 @@ echo "$FAILED passwords ($(echo "scale=2; $FAILED / $NUM * 100" | bc -l)%) faile
 
 # Password checkers
 r_cracklib() {
-parallel --pipe /usr/sbin/cracklib-check | fgrep -c -v ': OK'
+parallel --pipe /usr/sbin/cracklib-check 2>/dev/null | fgrep -c -v ': OK'
 }
 
 r_pwqcheck() {
-parallel --pipe pwqcheck -1 --multi | fgrep -c -v 'OK:'
+parallel --pipe pwqcheck -1 --multi 2>/dev/null | fgrep -c -v 'OK:'
 }
 
 # Password generators
@@ -50,11 +50,13 @@ pwgen -s -1 $LEN $NUM
 # certain number of) passwords of a certain length, pwqgen generates only one
 # password of certain randomness (in bits). With random=85 (the highest
 # setting), we're only guaranteed to get a password of at least 22 characters:
-# $ for a in {1..10000}; do pwqgen random=85; done | awk '{print length}' | sort -n | head -1
+#
+# $ for a in {1..10000}; do pwqgen random=85; done | awk '{print length}' | sort -n  | head -1
 # => 22
 #
 # The absolute maximum length seems to be 35 characters:
-# $ for a in {1..10000}; do pwqgen random=85; done | awk '{print length}' | sort -n | tail -1
+#
+# $ for a in {1..10000}; do pwqgen random=85; done | awk '{print length}' | sort -rn | head -1
 # => 35
 #
 r_pwqgen() {
@@ -74,11 +76,30 @@ apg -a 1 -m $LEN -x $LEN -n $NUM
 }
 
 r_gpw() {
+# gpw: Password Generator
+# http://www.multicians.org/thvv/tvvtools.html#gpw
+#  USAGE: gpw [npasswds] [pwlength<100]
 gpw $NUM $LEN
 }
 
 r_makepasswd() {
-makepasswd --chars=$LEN --count=$NUM
+# There are actually two versions available:
+#
+# The Debian version of makepasswd resides in the "whois" package:
+# > https://bugs.debian.org/116260
+# > whois: Why does it include mkpasswd?
+#
+# The Fedora people have their own version:
+# http://people.defora.org/~khorben/projects/makepasswd/
+#
+# makepasswd --chars=$LEN --count=$NUM				# Debian
+makepasswd -l $LEN -n $NUM					# Fedora
+}
+
+r_urandom() {
+for a in $(seq 1 $NUM); do
+	tr -dc A-Za-z0-9_ < /dev/urandom | head -c $LEN | xargs
+done
 }
 
 r_openssl() {
@@ -97,7 +118,7 @@ done | sed 's/.=$//' | cut -c-"$LEN"
 
 # main loop
 for c in cracklib pwqcheck; do
-	for g in pwgen pwqgen apg gpw makepasswd openssl; do
+	for g in pwgen pwqgen apg gpw makepasswd openssl urandom; do
 		printf "%10s - %s" $g
 		TIME_S=$(date +%s)
 		FAILED=$(r_$g | r_$c)
