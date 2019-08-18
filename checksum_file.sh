@@ -23,7 +23,6 @@
 # - Support other message digest algorithms (rmd160, sha3, ...)
 # - Support other checksum toolsets (coreutils, openssl, rhash)
 # - Rewrite file handling, process multiple files all at once.
-# - Test suite?
 # - Or rewrite this whole thing in Python, for portability's sake? (hashlib, os/xattr)
 #
 DIGEST="md5"			# md5, sha1, sha256, sha512
@@ -39,12 +38,13 @@ print_usage()
 	echo "       $(basename $0) [check-set] [file]"
 	echo "       $(basename $0) [check]     [file]"
 	echo "       $(basename $0) [remove]    [file]"
+	echo "       $(basename $0) [test]"
 	echo ""
 	echo "   get-set - sets a new checksum if none is found, print checksum otherwise."
 	echo " check-set - sets a new checksum if none is found, verify checksum otherwise."
 }
 
-if [ $# -ne 2 ] || [ ! -f "$2" ]; then
+if [ $# -ne 2 ] || [ ! -f "$2" ] && [ ! "$1" = "test" ]; then
 	print_usage
 	exit 1
 else
@@ -288,6 +288,24 @@ case ${ACTION} in
 		do_log "We don't support ${OS}, yet :-(" 1
 		;;
 	esac
+	;;
+
+####### TEST
+	test)
+	# We need a temporary file, even on macOS
+	TEMP=$(mktemp -p . 2>/dev/null || mktemp ./XXXXXXX 2>/dev/null)
+	if [ ! -f "$TEMP" ]; then
+		do_log "Failed to create temporary file ${TEMP}!" 1
+	else
+		date > ${TEMP}
+	fi
+
+	# More, and more elaborate tests needed.
+	for action in get-set check-set check remove get-set get remove check-set remove remove; do
+		printf "### ACTION: ${action}\t\t"
+		$0 ${action} ${TEMP}
+		echo
+	done
 	;;
 
 ####### HELP
