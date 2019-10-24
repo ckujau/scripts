@@ -19,7 +19,7 @@
 # https://martin-steigerwald.de/computer/programme/packbench/
 #
 PATH=/usr/local/bin:/usr/bin:/bin
-PROGRAMS=${PROGRAMS:-gzip pigz bzip2 pbzip2 xz pxz lz4 lzma plzma brotli zstd pzstd}
+PROGRAMS=${PROGRAMS:-gzip pigz bzip2 pbzip2 xz pxz lz4 lzma brotli zstd pzstd}
 MODES=${MODES:-9c 1c dc}			# {1..9}c for   compression
 						#      dc for decompression
 _help() {
