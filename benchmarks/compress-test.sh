@@ -19,7 +19,7 @@
 # https://martin-steigerwald.de/computer/programme/packbench/
 #
 PATH=/usr/local/bin:/usr/bin:/bin
-PROGRAMS=${PROGRAMS:-gzip pigz bzip2 pbzip2 xz pxz lz4 lzma brotli zstd pzstd}
+PROGRAMS=${PROGRAMS:-gzip pigz bzip2 pbzip2 lbzip2 xz pxz lz4 lzma lzip brotli zstd pzstd pixz}
 MODES=${MODES:-9c 1c dc}			# {1..9}c for   compression
 						#      dc for decompression
 _help() {
@@ -105,6 +105,16 @@ for m in $MODES; do
 				_cmd(){ ${p} -q${m} ${FILE}.${p}   > /dev/null; }
 			else
 				_cmd(){ ${p} -q${m} ${FILE}        > ${FILE}.${p}; }
+			fi
+			;;
+
+			pxz)
+			# For some reason pxz defaults to -T1 instead of -T0
+			if [ $m = "dc" ]; then
+				_cmd(){ ${p} -T0 -dc          ${FILE}.${p} > /dev/null; }
+			else
+				qual=$(echo $m | sed 's/c$//')				# Sigh...
+				_cmd(){ ${p} -T0  -c -${qual} ${FILE} > ${FILE}.${p}; }
 			fi
 			;;
 
