@@ -13,6 +13,7 @@
 _help() {
 	echo "Usage: $(basename $0) run    [user@][host] [size-in-MB] [runs] | tee report.out"
 	echo "       $(basename $0) report [report.out]  [top]"
+	echo "       $(basename $0) worst  [report.out]  [top]"
 	echo
 	echo "Note: Cipher, MAC and Kex algorithms can also be controlled by"
 	echo "      the CIPHER, MAC and KEX environment variables."
@@ -89,39 +90,39 @@ done
 #
 _report() {
 echo "### Top-$TOP overall"
-grep seconds "$FILE" | sort -nk9 | head -$TOP
+grep seconds "$FILE" | sort $REVERSE -nk9 | head -$TOP
 echo
 
 echo "### Fastest cipher"
-awk '/seconds/ {print $3, $9, "seconds"}' "$FILE" | sort -nk2 | head -$TOP | uniq -c
+awk '/seconds/ {print $3, $9, "seconds"}' "$FILE" | sort $REVERSE -nk2 | head -$TOP | uniq -c
 echo
 
 echo "### Fastest MAC"
-awk '/seconds/ {print $5, $9, "seconds"}' "$FILE" | sort -nk2 | head -$TOP | uniq -c
+awk '/seconds/ {print $5, $9, "seconds"}' "$FILE" | sort $REVERSE -nk2 | head -$TOP | uniq -c
 echo
 
 echo "### Fastest Kex"
-awk '/seconds/ {print $7, $9, "seconds"}' "$FILE" | sort -nk2 | head -$TOP | uniq -c
+awk '/seconds/ {print $7, $9, "seconds"}' "$FILE" | sort $REVERSE -nk2 | head -$TOP | uniq -c
 echo
 
 echo "### Top-$TOP for each cipher"
 for c in $(awk '/seconds/ {print $3}' "$FILE" | sort -u); do
 	echo "### Cipher: $c"
-	fgrep seconds "$FILE" | grep "$c" | sort -nk9 | head -$TOP
+	fgrep seconds "$FILE" | grep "$c" | sort $REVERSE -nk9 | head -$TOP
 	echo
 done
 
 echo "### Top-$TOP for each MAC"
 for m in $(awk '/seconds/ {print $5}' "$FILE" | sort -u); do
 	echo "### MAC: $m"
-	fgrep seconds "$FILE" | grep "$m" | sort -nk9 | head -$TOP
+	fgrep seconds "$FILE" | grep "$m" | sort $REVERSE -nk9 | head -$TOP
 	echo
 done
 
 echo "### Top-$TOP for each Kex"
 for k in $(awk '/seconds/ {print $7}' "$FILE" | sort -u); do
 	echo "### Kex: $k"
-	fgrep seconds "$FILE" | grep "$k" | sort -nk9 | head -$TOP
+	fgrep seconds "$FILE" | grep "$k" | sort $REVERSE -nk9 | head -$TOP
 	echo
 done
 }
@@ -139,10 +140,11 @@ case $1 in
 	fi
 	;;
 
-	report)
+	report|worst)
 	if [ ! -f "$2" ]; then
 		_help
 	else
+		[ $1 = "worst" ] && REVERSE="-r" # Hall of Shame
 		FILE="$2"
 		 TOP=${3:-5}
 		_report
