@@ -11,8 +11,8 @@
 # > https://anongit.mindrot.org/openssh.git/tree/regress/cipher-speed.sh
 #
 _help() {
-	echo "Usage: $(basename $0) run    [user@][host] [size-in-MB] [runs]"
-	echo "       $(basename $0) report [performance.log] [top]"
+	echo "Usage: $(basename $0) run    [user@][host] [size-in-MB] [runs] | tee report.out"
+	echo "       $(basename $0) report [report.out]  [top]"
 	echo
 	echo "Note: Cipher, MAC and Kex algorithms can also be controlled by"
 	echo "      the CIPHER, MAC and KEX environment variables."
@@ -54,7 +54,7 @@ for c in $CIPHER; do
       # Initialize run counter
       r=1
 
-      printf "$n/$COMB - cipher: $c \t mac: $m \t kex: $k - "
+      printf "$n/$COMB cipher: $c \t mac: $m \t kex: $k - "
 #     [ $RUNS -lt 10 ] && printf " "				# Formatting quirk...
 
       a=$(date +%s)
@@ -77,7 +77,7 @@ for c in $CIPHER; do
       # Calculate the average time for one run; reset the error counter.
       b=$(date +%s)
       d=$(echo \( $b - $a \) / $RUNS | bc)
-      [ -z "$ERR" ] && printf "$d seconds avg.\n" || unset ERR
+      [ -z "$ERR" ] && echo "$d seconds avg." || unset ERR
       n=$((n+1))
     done
   done
@@ -89,39 +89,39 @@ done
 #
 _report() {
 echo "### Top-$TOP overall"
-grep seconds "$FILE" | sort -rnk10 | tail -$TOP
+grep seconds "$FILE" | sort -nk9 | head -$TOP
 echo
 
 echo "### Fastest cipher"
-awk '/seconds/ {print $4, $10, "seconds"}' "$FILE" | sort -rnk2 | tail -$TOP
+awk '/seconds/ {print $3, $9, "seconds"}' "$FILE" | sort -nk2 | head -$TOP | uniq -c
 echo
 
 echo "### Fastest MAC"
-awk '/seconds/ {print $6, $10, "seconds"}' "$FILE" | sort -rnk2 | tail -$TOP
+awk '/seconds/ {print $5, $9, "seconds"}' "$FILE" | sort -nk2 | head -$TOP | uniq -c
 echo
 
 echo "### Fastest Kex"
-awk '/seconds/ {print $8, $10, "seconds"}' "$FILE" | sort -rnk2 | tail -$TOP
+awk '/seconds/ {print $7, $9, "seconds"}' "$FILE" | sort -nk2 | head -$TOP | uniq -c
 echo
 
 echo "### Top-$TOP for each cipher"
-for c in $(awk '/seconds/ {print $4}' "$FILE" | sort -u); do
+for c in $(awk '/seconds/ {print $3}' "$FILE" | sort -u); do
 	echo "### Cipher: $c"
-	fgrep seconds "$FILE" | grep "$c" | sort -rnk10 | tail -$TOP
+	fgrep seconds "$FILE" | grep "$c" | sort -nk9 | head -$TOP
 	echo
 done
 
 echo "### Top-$TOP for each MAC"
-for m in $(awk '/seconds/ {print $6}' "$FILE" | sort -u); do
+for m in $(awk '/seconds/ {print $5}' "$FILE" | sort -u); do
 	echo "### MAC: $m"
-	fgrep seconds "$FILE" | grep "$m" | sort -rnk10 | tail -$TOP
+	fgrep seconds "$FILE" | grep "$m" | sort -nk9 | head -$TOP
 	echo
 done
 
 echo "### Top-$TOP for each Kex"
-for k in $(awk '/seconds/ {print $8}' "$FILE" | sort -u); do
+for k in $(awk '/seconds/ {print $7}' "$FILE" | sort -u); do
 	echo "### Kex: $k"
-	fgrep seconds "$FILE" | grep "$k" | sort -rnk10 | tail -$TOP
+	fgrep seconds "$FILE" | grep "$k" | sort -nk9 | head -$TOP
 	echo
 done
 }
