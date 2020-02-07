@@ -56,7 +56,13 @@ for d in md5 sha1 sha224 sha256 sha384 sha512 ripemd160; do
 		echo "TEST: coreutils / DIGEST: $d / SKIPPED"
 	fi
 
-	# Perl's shasum only understands SHA variants
+	# Perl's shasum only understands SHA variants.
+	# FIXME: that's not true, at all -- we could just use the installed
+	# modules directly, like:
+	# > perl -le 'use Digest::SHA  qw(sha1_hex);     print     sha1_hex(<>);'
+	# > perl -le 'use Digest::MD5  qw(md5_hex);      print      md5_hex(<>);'
+	# > perl -le 'use Digest::SHA  qw(sha256_hex);   print   sha256_hex(<>);'
+	# > perl -le 'use Digest::SHA3 qw(sha3_256_hex); print sha3_256_hex(<>);'
 	case $d in
 		sha*)
 		# Remove the "sha" prefix from the digest names
