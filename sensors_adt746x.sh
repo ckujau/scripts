@@ -21,7 +21,7 @@ case $1 in
 	;;
 
 	-h)
-	echo "Usage: `basename $0` [-s]  ....print short summary"
+	echo "Usage: $(basename "$0") [-s]  ....print short summary"
 	echo "                  [-b]  ....print battery status"
 	echo "                  [-h]  ....print this help text"
 	echo "With no arguments supplied, we will print out a long summary."

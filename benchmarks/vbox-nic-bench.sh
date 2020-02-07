@@ -16,8 +16,8 @@
 NICTYPES="Am79C970A Am79C973 82540EM 82543GC 82545EM virtio"
 
 if [ $# -ne 3 ]; then
-	echo "Usage: $(basename $0) [vm1] [vm2]         [num]"
-	echo "       $(basename $0) [report] [file.log] [num]"
+	echo "Usage: $(basename "$0") [vm1] [vm2]         [num]"
+	echo "       $(basename "$0") [report] [file.log] [num]"
 	echo ""
 	echo " NOTES:"
 	echo " * An iperf3 server MUST be started on vm1 after boot."
@@ -43,7 +43,7 @@ if [ "$1" = "report" ]; then
 fi
 
 # Dry-run?
-[ $NUM = 0 ] && DEBUG=echo
+[ "$NUM" = 0 ] && DEBUG=echo
 
 die() {
 	echo "$@"
@@ -63,40 +63,40 @@ ison() {
 
 for nic2 in $NICTYPES; do
 	echo "### NIC2: $nic2 -- shutting down $VM2"
-	ison $VM2 && ( $DEBUG VBoxManage controlvm $VM2 acpipowerbutton || die "VBoxManage controlvm $VM2 acpipowerbutton FAILED" )
+	ison "$VM2" && ( $DEBUG VBoxManage controlvm "$VM2" acpipowerbutton || die "VBoxManage controlvm $VM2 acpipowerbutton FAILED" )
 	$DEBUG sleep 20
 
 	echo "### NIC2: $nic2 -- setting NIC to $nic2 on $VM2"
-	$DEBUG VBoxManage modifyvm   $VM2 --nictype1 "$nic2" || die "VBoxManage modifyvm $VM2 --nictype1 "$nic2" FAILED"
-	$DEBUG VBoxManage showvminfo $VM2 --machinereadable | grep -A1 -w nic1
+	$DEBUG VBoxManage modifyvm   "$VM2" --nictype1 "$nic2" || die "VBoxManage modifyvm $VM2 --nictype1 "$nic2" FAILED"
+	$DEBUG VBoxManage showvminfo "$VM2" --machinereadable | grep -A1 -w nic1
 
 	echo "### NIC2: $nic2 -- starting $VM2"
-	$DEBUG VBoxManage startvm $VM2 --type headless || die "VBoxManage startvm $VM2 --type headless FAILED"
+	$DEBUG VBoxManage startvm "$VM2" --type headless || die "VBoxManage startvm $VM2 --type headless FAILED"
 #	$DEBUG VBoxHeadless --startvm $VM2 &
 #	[ $? = 0 ] || die "VBoxHeadless --startvm $VM2 FAILED"
 	$DEBUG sleep 30
 
 	for nic1 in $NICTYPES; do
 		echo "### NIC1: $nic1 -- shutting down $VM1"
-		ison $VM1 && ( $DEBUG VBoxManage controlvm $VM1 acpipowerbutton || die "VBoxManage controlvm $VM1 acpipowerbutton FAILED" )
+		ison "$VM1" && ( $DEBUG VBoxManage controlvm "$VM1" acpipowerbutton || die "VBoxManage controlvm $VM1 acpipowerbutton FAILED" )
 		$DEBUG sleep 20
 
 		echo "### NIC1: $nic1 -- setting NIC to $nic1 on $VM1"
-		ison $VM1 || ( $DEBUG VBoxManage modifyvm $VM1 --nictype1 "$nic1" || die "VBoxManage modifyvm $VM1 --nictype1 "$nic1" FAILED" )
-		$DEBUG VBoxManage showvminfo $VM1 --machinereadable | grep -A1 -w nic1
+		ison "$VM1" || ( $DEBUG VBoxManage modifyvm "$VM1" --nictype1 "$nic1" || die "VBoxManage modifyvm $VM1 --nictype1 "$nic1" FAILED" )
+		$DEBUG VBoxManage showvminfo "$VM1" --machinereadable | grep -A1 -w nic1
 
 		echo "### NIC1: $nic1 -- starting $VM1"
-		$DEBUG VBoxManage startvm $VM1 --type headless || die "VBoxManage startvm $VM1 --type headless FAILED"
+		$DEBUG VBoxManage startvm "$VM1" --type headless || die "VBoxManage startvm $VM1 --type headless FAILED"
 #		$DEBUG VBoxHeadless --startvm $VM1 &
 #		[ $? = 0 ] || die "VBoxHeadless --startvm $VM1 FAILED"
 		$DEBUG sleep 30
 
 		echo "### Running iperf3 tests. NIC1: $nic1 NIC2: $nic2"
 		a=1
-		while [ $a -le $NUM ] || [ $NUM = 0 ]; do
+		while [ $a -le "$NUM" ] || [ "$NUM" = 0 ]; do
 			echo "### RUN $a of $NUM"
 # NAT		#	$DEBUG ssh -p2001 192.168.56.1 "iperf3 -f M -c 10.0.2.5" || die "ssh -p2001 192.168.56.1 ... FAILED"
-			$DEBUG ssh $VM2 "iperf3 -f M -T \"$nic1 - $nic2\" -c $VM1" || die "ssh $VM2 -- FAILED"
+			$DEBUG ssh "$VM2" "iperf3 -f M -T \"$nic1 - $nic2\" -c $VM1" || die "ssh $VM2 -- FAILED"
 			[ -z "$DEBUG" ] && a=$((a++1)) || break
 		done | egrep 'RUN|ssh|sender|receiver'					# The "ssh" is only matched in $DEBUG mode
 		echo

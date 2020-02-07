@@ -110,15 +110,15 @@ while [ $? -eq 0 ]; do
 
 	# Output the line.
 	if [ "$cls" ]; then
-		printf '<span class="'${cls}'">'${s}'</span>'
+		printf '<span class="'${cls}'">'"${s}"'</span>'
 	else
-		printf ${s}
+		printf "${s}"
 	fi
 	read -r s
 done
 IFS=$OIFS
 
-if [ $diffseen -eq 0 ] && [ $onlyseen -eq 0 ]; then 
+if [ $diffseen -eq 0 ] && [ "$onlyseen" -eq 0 ]; then 
 	printf '</span>'
 else
 	echo "</div>"

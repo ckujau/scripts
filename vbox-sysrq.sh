@@ -26,7 +26,7 @@
 # https://web.archive.org/web/20130102094426/http://blog.frameos.org/2011/06/08/changing-linux-terminals-in-virtualbox-using-vboxmanage
 #
 if [ ! $# -eq 2 ]; then
-	echo "Usage: `basename $0` [vm] [sysrq]"
+	echo "Usage: $(basename "$0") [vm] [sysrq]"
 	echo "                     [vm] help"
 	exit 1
 else
@@ -35,7 +35,7 @@ else
 fi
 
 # https://www.kernel.org/doc/Documentation/admin-guide/sysrq.rst
-PRESS=`echo "
+PRESS=$(echo "
 b|30		# reBoot
 c|2E		# Crash
 e|12		# terminate-all-tasks
@@ -56,16 +56,16 @@ t|14		# show-task-states
 u|16		# Unmount
 w|11		# show-blocked-tasks
 z|2C		# dump-ftrace-buffer
-" | grep "^"$SYSRQ"" | cut -c3,4`
+" | grep -E "^${SYSRQ}" | cut -c3,4)
 
 if [ -n "$PRESS" ]; then
-	RELEASE=`printf "%X\n" $((0x$PRESS + 0x80))`	# or: 'obase=16; ibase=16; $PRESS + 80 | bc'
+	RELEASE=$(printf "%X\n" $((0x$PRESS + 0x80)))	# or: 'obase=16; ibase=16; $PRESS + 80 | bc'
 	set -x
-	VBoxManage controlvm "$VM" keyboardputscancode 1d 38 54 $PRESS $RELEASE d4 b8 9d
+	VBoxManage controlvm "$VM" keyboardputscancode 1d 38 54 "$PRESS" "$RELEASE" d4 b8 9d
 else
 	echo
-	echo "Unknown sysrq key! ("$SYSRQ")"
-	egrep '^.\|' $0
+	echo "Unknown sysrq key! ("${SYSRQ}")"
+	egrep '^.\|' "$0"
 	echo
 	exit 1
 fi

@@ -21,14 +21,14 @@ HASH=sha1			# See 'openssl dgst -h' for possible values
 # DEBUG=echo
 
 if [ ! -d "$1" ]; then
-	echo "Usage: `basename $0` [dir] [-c]"
+	echo "Usage: $(basename "$0") [dir] [-c]"
 	exit 1
 else
 	DIR="$1"
 fi
 
 # Use 'gdate' if available, 'date' otherwise
-if [ "`which gdate`" ]; then
+if [ "$(which gdate)" ]; then
 	DATE=gdate
 else
 	DATE=date
@@ -38,8 +38,8 @@ $DATE
 # We have checks too :-)
 if [ "$2" = "-c" ]; then
 	for f in "$DIR"/*.bz2; do
-		printf "Processing $f (`stat -c 'scale=0; %s / 1024' $f | bc -l`KB)..."
-		grep -q `bzip2 -dc "$f" | openssl $HASH` `echo $f | sed "s/.bz2$/.$HASH/"`
+		printf "Processing $f ($(stat -c 'scale=0; %s / 1024' "$f" | bc -l)KB)..."
+		grep -q $(bzip2 -dc "$f" | openssl $HASH) $(echo "$f" | sed "s/.bz2$/.$HASH/")
 		if [ $? = 0 ]; then
 			echo "checksum OK"
 		else
@@ -49,8 +49,8 @@ if [ "$2" = "-c" ]; then
 exit 0
 fi
 
-BEGIN=`$DATE +%s`
-for db in `mysql --batch --skip-column-names -e 'show databases' | sort`; do
+BEGIN=$($DATE +%s)
+for db in $(mysql --batch --skip-column-names -e 'show databases' | sort); do
 	printf "Backing up "$db"...."
 	# - Use multiple-row INSERT syntax that include several VALUES lists
 	# - Continue even if an SQL error occurs during a table dump
@@ -81,9 +81,9 @@ for db in `mysql --batch --skip-column-names -e 'show databases' | sort`; do
 	esac
 
 	if [ -n "$DEBUG" ]; then
-		$DEBUG mysqldump $OPTIONS "$db"   egrep -v -- '^-- Dump completed on'   "$DIR"/DB_"$db".sql.new
+		$DEBUG mysqldump "$OPTIONS" "$db"   egrep -v -- '^-- Dump completed on'   "$DIR"/DB_"$db".sql.new
 	else
-		$DEBUG mysqldump $OPTIONS "$db" | egrep -v -- '^-- Dump completed on' > "$DIR"/DB_"$db".sql.new
+		$DEBUG mysqldump "$OPTIONS" "$db" | egrep -v -- '^-- Dump completed on' > "$DIR"/DB_"$db".sql.new
 	fi
 	
 	# We're comparing checksum rather than the whole dump, so that we
@@ -96,8 +96,8 @@ for db in `mysql --batch --skip-column-names -e 'show databases' | sort`; do
 		else
 			$DEBUG openssl $HASH "$DIR"/DB_"$db".sql.new | sed 's/\.new$//' > "$DIR"/DB_"$db".sql.new.$HASH
 		fi
-		H_OLD=`awk '{print $NF}' "$DIR"/DB_"$db".sql.$HASH     2>/dev/null`
-		H_NEW=`awk '{print $NF}' "$DIR"/DB_"$db".sql.new.$HASH 2>/dev/null`
+		H_OLD=$(awk '{print $NF}' "$DIR"/DB_"$db".sql.$HASH     2>/dev/null)
+		H_NEW=$(awk '{print $NF}' "$DIR"/DB_"$db".sql.new.$HASH 2>/dev/null)
 		
 		# - If they are equal, delete our new one, otherwise update the old one
 		if [ "$H_OLD" = "$H_NEW" ]; then
@@ -122,6 +122,6 @@ for db in `mysql --batch --skip-column-names -e 'show databases' | sort`; do
 	fi
 	$DEBUG
 done
-END=`$DATE +%s`
-echo "$0 finished after `echo $END - $BEGIN | bc` seconds."
+END=$($DATE +%s)
+echo "$0 finished after $(echo "$END" - "$BEGIN" | bc) seconds."
 echo

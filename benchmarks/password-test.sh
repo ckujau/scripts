@@ -9,26 +9,26 @@
 
 # Password length and number of passwords required
 if [ -z "$1" ]; then
-	echo "Usage: $(basename $0) [length] [num]"
+	echo "Usage: $(basename "$0") [length] [num]"
 	exit 1
 else
 	LEN="$1"
 	NUM="$2"
 
 	# See the comment for r_pwqgen below
-	if [ $LEN -gt 22 ]; then
+	if [ "$LEN" -gt 22 ]; then
 		echo "WARNING: \"length\" is greater than 22, results for pwqgen may not be correct!"
 	fi
 	
 	# See the comment for r_openssl below
-	if [ $LEN -gt 64 ]; then
+	if [ "$LEN" -gt 64 ]; then
 		echo "WARNING: \"length\" is greater than 64, results for openssl may not be correct!"
 	fi
 fi
 
 stats() {
 # arguments: FAILED, NUM, TYPE, TIME_E, TIME_S
-echo "$FAILED passwords ($(echo "scale=2; $FAILED / $NUM * 100" | bc -l)%) failed for $c, runtime: $(expr $TIME_E - $TIME_S) seconds."
+echo "$FAILED passwords ($(echo "scale=2; $FAILED / $NUM * 100" | bc -l)%) failed for $c, runtime: $(expr "$TIME_E" - "$TIME_S") seconds."
 }
 
 # Password checkers
@@ -42,7 +42,7 @@ parallel --pipe pwqcheck -1 --multi 2>/dev/null | fgrep -c -v 'OK:'
 
 # Password generators
 r_pwgen() {
-pwgen -s -1 $LEN $NUM
+pwgen -s -1 "$LEN" "$NUM"
 }
 
 #
@@ -61,7 +61,7 @@ pwgen -s -1 $LEN $NUM
 #
 r_pwqgen() {
 # The following is good enough for passwords of length 22 characters and below:
-for a in $(seq 1 $NUM); do
+for a in $(seq 1 "$NUM"); do
 	pwqgen random=85
 done | cut -c-"$LEN" | egrep -o "^.{$LEN}$"
 
@@ -72,14 +72,14 @@ done | cut -c-"$LEN" | egrep -o "^.{$LEN}$"
 }
 
 r_apg() {
-apg -a 1 -m $LEN -x $LEN -n $NUM
+apg -a 1 -m "$LEN" -x "$LEN" -n "$NUM"
 }
 
 r_gpw() {
 # gpw: Password Generator
 # https://www.multicians.org/thvv/tvvtools.html#gpw
 #  USAGE: gpw [npasswds] [pwlength<100]
-gpw $NUM $LEN
+gpw "$NUM" "$LEN"
 }
 
 r_makepasswd() {
@@ -93,12 +93,12 @@ r_makepasswd() {
 # > https://koji.fedoraproject.org/koji/packageinfo?packageID=17537
 #
 # makepasswd --chars=$LEN --count=$NUM				# Debian
-makepasswd -l $LEN -n $NUM					# Fedora
+makepasswd -l "$LEN" -n "$NUM"					# Fedora
 }
 
 r_urandom() {
-for a in $(seq 1 $NUM); do
-	tr -dc A-Za-z0-9_ < /dev/urandom | head -c $LEN | xargs
+for a in $(seq 1 "$NUM"); do
+	tr -dc A-Za-z0-9_ < /dev/urandom | head -c "$LEN" | xargs
 done
 }
 
@@ -111,7 +111,7 @@ r_openssl() {
 # two equal signs ("=="). Using -hex would limit our charset too much though. Also,
 # since we're reading line-by-line, we have an upper limit of 64 characters.
 #
-for a in $(seq 1 $NUM); do
+for a in $(seq 1 "$NUM"); do
 	openssl rand -base64 64 | head -1
 done | sed 's/.=$//' | cut -c-"$LEN"
 }
@@ -123,7 +123,7 @@ for c in cracklib pwqcheck; do
 		TIME_S=$(date +%s)
 		FAILED=$(r_$g | r_$c)
 		TIME_E=$(date +%s)
-		stats $FAILED $NUM $c $TIME_E $TIME_S
+		stats "$FAILED" "$NUM" $c "$TIME_E" "$TIME_S"
 	done
 	echo
 done

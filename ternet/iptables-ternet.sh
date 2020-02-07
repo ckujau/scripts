@@ -24,7 +24,7 @@ case $1 in
 	;;
 	
 	*)
-	echo "Usage: `basename $0` [start|stop]"
+	echo "Usage: $(basename "$0") [start|stop]"
 	exit 1
 	;;
 esac

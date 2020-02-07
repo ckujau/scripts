@@ -22,12 +22,12 @@ if [ "$1" = "report" ] && [ -f "$2" ]; then
 fi
 
 # FIXME: Do we want more options on the command line?
-if [ ! -c /dev/r${1} ] || [ -z "$2" ]; then
-	echo "Usage:    $(basename $0) [devicename] [runs]"
-	echo "          $(basename $0) report [out.txt]"
+if [ ! -c /dev/r"${1}" ] || [ -z "$2" ]; then
+	echo "Usage:    $(basename "$0") [devicename] [runs]"
+	echo "          $(basename "$0") report [out.txt]"
 	echo ""
-	echo "Example:  $(basename $0) wd0b 5 | tee out.txt"
-	echo "          $(basename $0) report out.txt"
+	echo "Example:  $(basename "$0") wd0b 5 | tee out.txt"
+	echo "          $(basename "$0") report out.txt"
 	exit 1
 else
 	# Note: in BSD, we will use character devices, not block devices. However,
@@ -40,23 +40,23 @@ else
 fi
 
 # RAW
-for i in $(seq 1 $NUM); do
+for i in $(seq 1 "$NUM"); do
 	printf "MODE: raw     I: $i\t"
-	dd if=/dev/r${DEV}  of=/dev/null bs=1k $DEBUG conv=sync 2>&1 | grep bytes
+	dd if=/dev/r"${DEV}"  of=/dev/null bs=1k "$DEBUG" conv=sync 2>&1 | grep bytes
 done
 
 # CGD
 for c in $CIPHERS; do
-	cgdconfig -g -k urandomkey -o ${PRM}/test_${c} $c
-	cgdconfig ${CGD} /dev/${DEV}  ${PRM}/test_${c}
+	cgdconfig -g -k urandomkey -o "${PRM}"/test_"${c}" "$c"
+	cgdconfig ${CGD} /dev/"${DEV}"  "${PRM}"/test_"${c}"
 
 	# Repeat NUM times...
-	for i in $(seq 1 $NUM); do
+	for i in $(seq 1 "$NUM"); do
 		printf "MODE: $c I: $i\t"
-		dd if=/dev/r${CGD}a of=/dev/null bs=1k $DEBUG conv=sync 2>&1 | grep bytes
+		dd if=/dev/r${CGD}a of=/dev/null bs=1k "$DEBUG" conv=sync 2>&1 | grep bytes
 	done
 
 	cgdconfig -u /dev/${CGD}a
-	rm -f ${PRM}/test_${c}
+	rm -f "${PRM}"/test_"${c}"
 done
-rmdir ${PRM}
+rmdir "${PRM}"

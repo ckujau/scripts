@@ -16,7 +16,7 @@ if [ -f "$1" ]; then
 	FILE="$1"
 	RUNS=${2:-1}
 else
-	echo "Usage: $(basename $0) [file] [n]"
+	echo "Usage: $(basename "$0") [file] [n]"
 	exit 1
 fi
 
@@ -26,15 +26,15 @@ fi
 get_time() {
 	TEST="$1"
 	# Only one run for rhash_benchmark
-	[ $TEST = "rhash_benchmark" ] && n=1 || n=$RUNS
+	[ "$TEST" = "rhash_benchmark" ] && n=1 || n=$RUNS
 	shift
 
 	TIME_A=$(date +%s)
-	for i in `seq 1 $n`; do
+	for i in $(seq 1 "$n"); do
 		$DEBUG $@
 	done
 	TIME_B=$(date +%s)
-	echo "TEST: $TEST / DIGEST: $d / $(echo $TIME_B - $TIME_A | bc -l) seconds over $n runs"
+	echo "TEST: $TEST / DIGEST: $d / $(echo "$TIME_B" - "$TIME_A" | bc -l) seconds over $n runs"
 }
 
 

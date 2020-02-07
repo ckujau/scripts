@@ -6,12 +6,12 @@
 CONF="/etc/rsnapshot"
 
 if [ ! $# = 1 ]; then
-	HOSTS=`ls "$CONF"/rsnapshot-*.conf | sed 's/.*\/rsnapshot-//;s/\.conf//' | xargs echo | sed 's/ /|/g'`
-	echo "Usage: `basename $0` [$HOSTS]"
+	HOSTS=$(ls "$CONF"/rsnapshot-*.conf | sed 's/.*\/rsnapshot-//;s/\.conf//' | xargs echo | sed 's/ /|/g')
+	echo "Usage: $(basename "$0") [$HOSTS]"
 	exit 1
 else
 	CONF="$CONF"/rsnapshot-"$1".conf
-	 DIR=`awk '/^snapshot_root/ {print $2}' $CONF`
+	 DIR=$(awk '/^snapshot_root/ {print $2}' "$CONF")
 
 	# Don't let rsnapshot-wrapper remount our backup store
 	WRAPPER_CONF="/usr/local/etc/rsnapshot-wrapper.conf"
@@ -23,9 +23,9 @@ else
 fi
 
 for i in daily weekly monthly; do
-	C=`ls -d "$DIR"/"$i".* 2>/dev/null | wc -l`
+	C=$(ls -d "$DIR"/"$i".* 2>/dev/null | wc -l)
 	j=0
-	while [ $j -le $C ]; do
+	while [ $j -le "$C" ]; do
 		echo "("$j"/"$C") rsnapshot -c "$CONF" "$i"..."
 		rsnapshot -c "$CONF" "$i"
 		j=$((j+1))

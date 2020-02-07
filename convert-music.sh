@@ -13,7 +13,7 @@
 # > https://forums.gentoo.org/viewtopic-t-463068.html
 #
 if [ ! $# -eq 2 ] || [ ! -f "$2" ]; then
-	echo "Usage: `basename $0` [conversion] [file]"
+	echo "Usage: $(basename "$0") [conversion] [file]"
 	echo "Conversions: flac2mp3, m4a2mp3, ogg2mp3"
 	exit 1
 else
@@ -70,13 +70,13 @@ case $CONVERSION in
 	  DATE=$(faad --info "$FILE" 2>&1 | grep ^date   | sed 's/^.*: //')
 	 GENRE=$(faad --info "$FILE" 2>&1 | grep ^genre  | sed 's/^.*: //')
 
-	faad --stdio "$FILE" | lame $LAMEARGS --tn "${TRACK:-0}" --tt "$TITLE" \
+	faad --stdio "$FILE" | lame "$LAMEARGS" --tn "${TRACK:-0}" --tt "$TITLE" \
 		--ta "$ARTIST" --tl "$ALBUM" --ty "$DATE" --tg "${GENRE:-12}" - "$OUTPUT"
 	;;
 
 	ogg2mp3)
 	OUTPUT=${FILE%.ogg}.mp3
-	eval `ogginfo -qv "$FILE" | awk '/ARTIST/ || /TITLE/' | sed 's/^     //'`
+	eval $(ogginfo -qv "$FILE" | awk '/ARTIST/ || /TITLE/' | sed 's/^     //')
 #	echo "ARTIST: $ARTIST TITLE: $TITLE"
 	if [ -z "$ARTIST" ] || [ -z "$TITLE" ]; then
 		echo "WARNING: Not enough metadata, trying to gather track information from filename! ($FILE)"
@@ -84,16 +84,16 @@ case $CONVERSION in
 		 TITLE=$(ls "$FILE" | sed 's/^[0-9]* - //;s/\.ogg//')
 
 		# Try to find the ARLBUM via the directory name
-		cd "`dirname "$FILE"`"
-		ALBUM="`basename $(pwd)`"
+		cd "$(dirname "$FILE")" || exit
+		ALBUM="$(basename $(pwd))"
 		echo "TRACK: $TRACK TITLE: $TITLE ALBUM: $ALBUM"
 	fi
-	oggdec --quiet "$FILE" --output - | lame $LAMEARGS --tn "${TRACK:-0}" --tt "$TITLE" \
+	oggdec --quiet "$FILE" --output - | lame "$LAMEARGS" --tn "${TRACK:-0}" --tt "$TITLE" \
 		--tl "$ALBUM" - "$OUTPUT"
 	;;
 
 	*)
-	echo "`basename $0`: conversion $CONVERSION unknow."
+	echo "$(basename "$0"): conversion $CONVERSION unknow."
 	exit 1
 	;;
 esac

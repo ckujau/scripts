@@ -21,10 +21,10 @@ case $1 in
 	port echo outdated 
 	port upgrade -u outdated
 	if [ -f "$LAST" ]; then
-		A=`stat -f %m "$LAST"`
-		B=`date +%s`
+		A=$(stat -f %m "$LAST")
+		B=$(date +%s)
 		# Cleanup every 1209600 seconds (14 days)
-		if [ `echo $B - $A | bc` -gt 1209600 ]; then
+		if [ $(echo "$B" - "$A" | bc) -gt 1209600 ]; then
 			echo "port clean all..."
 			echo nice -n20 port clean -f --all all > /dev/null
 		fi
@@ -34,7 +34,7 @@ case $1 in
 	;;
 
 	*)
-	echo "Usage: `basename $0` [i|a|u]"
+	echo "Usage: $(basename "$0") [i|a|u]"
 	echo "i - list inactive"
 	echo "a - list active"
 	echo "u - upgrade"

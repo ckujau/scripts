@@ -12,13 +12,13 @@ FILE=/var/run/rsnapshot.ready
 # DEBUG=echo
 
 if [ $# = 0 ]; then
-	echo "Usage: `basename $0` [dir1] [dir2] [...]"
+	echo "Usage: $(basename "$0") [dir1] [dir2] [...]"
 	exit 1
 fi
 
 for d in $@; do
 	# normalize
-	DIR=`echo $d | sed 's/\/$//'`
+	DIR=$(echo "$d" | sed 's/\/$//')
 	test -n "$DEBUG" && echo "DIR: $DIR"
 
 	# check if we're mounted

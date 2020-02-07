@@ -32,13 +32,13 @@ PATH=/bin:/usr/bin:/sbin:/usr/local/bin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
 
 print_usage()
 {
-	echo "Usage: $(basename $0) [get]       [file]"
-	echo "       $(basename $0) [set]       [file]"
-	echo "       $(basename $0) [get-set]   [file]"
-	echo "       $(basename $0) [check-set] [file]"
-	echo "       $(basename $0) [check]     [file]"
-	echo "       $(basename $0) [remove]    [file]"
-	echo "       $(basename $0) [test]"
+	echo "Usage: $(basename "$0") [get]       [file]"
+	echo "       $(basename "$0") [set]       [file]"
+	echo "       $(basename "$0") [get-set]   [file]"
+	echo "       $(basename "$0") [check-set] [file]"
+	echo "       $(basename "$0") [check]     [file]"
+	echo "       $(basename "$0") [remove]    [file]"
+	echo "       $(basename "$0") [test]"
 	echo ""
 	echo "   get-set - sets a new checksum if none is found, print checksum otherwise."
 	echo " check-set - sets a new checksum if none is found, verify checksum otherwise."
@@ -56,7 +56,7 @@ fi
 # Print, exit if necessary
 do_log() {
 	echo "$1"
-	[ -n "$2" ] && exit $2
+	[ -n "$2" ] && exit "$2"
 }
 
 # CALC
@@ -172,19 +172,19 @@ CHECKSUM_C=$(_calc "$1")
 
 case ${OS} in
 	Darwin)
-	xattr -w user.checksum.${DIGEST} ${CHECKSUM_C} "$1"
+	xattr -w user.checksum.${DIGEST} "${CHECKSUM_C}" "$1"
 	;;
 
 	FreeBSD)
-	pxattr -n user.checksum.${DIGEST} -v ${CHECKSUM_C} "$1"
+	pxattr -n user.checksum.${DIGEST} -v "${CHECKSUM_C}" "$1"
 	;;
 
 	NetBSD)
-	setextattr user checksum.${DIGEST} ${CHECKSUM_C} "$1"
+	setextattr user checksum.${DIGEST} "${CHECKSUM_C}" "$1"
 	;;
 
 	Linux)
-	setfattr --name user.checksum.${DIGEST} --value ${CHECKSUM_C} -- "$1"
+	setfattr --name user.checksum.${DIGEST} --value "${CHECKSUM_C}" -- "$1"
 	;;
 
 	SunOS)
@@ -256,7 +256,7 @@ case ${ACTION} in
 		do_log "ERROR: failed to calculate/get the ${DIGEST} checksum for file ${FILE}!" 1
 
 	# Compare checksums
-	if [ ${CHECKSUM_S} = ${CHECKSUM_C} ]; then
+	if [ "${CHECKSUM_S}" = "${CHECKSUM_C}" ]; then
 		echo "FILE: ${FILE} - OK"
 		true
 	else
@@ -304,22 +304,22 @@ case ${ACTION} in
 	if [ ! -f "$TEMP" ]; then
 		do_log "Failed to create temporary file ${TEMP}!" 1
 	else
-		date > ${TEMP}
+		date > "${TEMP}"
 	fi
 
 	# More, and more elaborate tests needed.
 	for action in get get-set check-set check remove remove check-set remove check; do
 		echo "### ACTION: ${action}"
-		$0 ${action} ${TEMP}
+		$0 ${action} "${TEMP}"
 		echo $? && echo
 	done
 
 	echo "### ACTION: set - alter - check"
-	$0 set    ${TEMP}
+	$0 set    "${TEMP}"
 	echo "Modifying ${TEMP}..."
-	echo . >> ${TEMP}
-	$0 check  ${TEMP}
-	echo $?
+	echo . >> "${TEMP}"
+	$0 check  "${TEMP}"
+	echo "RC: $?"
 	;;
 
 ####### HELP

@@ -30,7 +30,7 @@
 
 # RIP
 die() {
-	echo $1
+	echo "$1"
 	exit 2
 }
 
@@ -55,7 +55,7 @@ for c in aes anubis blowfish camellia cast5 cast6 cipher_null khazad salsa20 ser
 				C=$c-$m-essiv:$h
 			fi
 			for s in 128 256 384 448 512; do
-				$DEBUG cryptsetup -c $C -s $s -d /dev/urandom create $MD $DEVICE 2>/dev/null
+				$DEBUG cryptsetup -c $C -s $s -d /dev/urandom create $MD "$DEVICE" 2>/dev/null
 				if [ $? = 0 ]; then
 					echo "Valid combination: cipher $C - size $s"
 					$DEBUG cryptsetup status $MD

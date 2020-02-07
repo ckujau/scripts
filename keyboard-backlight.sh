@@ -43,22 +43,22 @@ exit 1
 case $1 in
 	up)
 	# BRIGHTNESS will be capped at 255 anyway
-	if [ $BRIGHTNESS -lt 255 ]; then
-		expr $BRIGHTNESS + $INCREMENT > $BACKLIGHT
+	if [ "$BRIGHTNESS" -lt 255 ]; then
+		expr "$BRIGHTNESS" + $INCREMENT > $BACKLIGHT
 	else
-		die $BRIGHTNESS
+		die "$BRIGHTNESS"
 	fi
 	;;
 
 	down)
-	if [ $BRIGHTNESS -gt 0 ]; then
-		VALUE=`expr $BRIGHTNESS - $INCREMENT`
+	if [ "$BRIGHTNESS" -gt 0 ]; then
+		VALUE=$(expr "$BRIGHTNESS" - $INCREMENT)
 
 		# BRIGHTNESS cannot be negative
-		[ $VALUE -lt 0 ] && VALUE=0
+		[ "$VALUE" -lt 0 ] && VALUE=0
 		echo $VALUE > $BACKLIGHT
 	else
-		die $BRIGHTNESS
+		die "$BRIGHTNESS"
 	fi
 	;;
 
@@ -72,8 +72,8 @@ case $1 in
 
 	[\-0-9]*)
 	VALUE=$1
-	if [ $VALUE -ge 0 ] && [ $VALUE -le 255 ]; then
-		echo $VALUE > $BACKLIGHT
+	if [ "$VALUE" -ge 0 ] && [ "$VALUE" -le 255 ]; then
+		echo "$VALUE" > $BACKLIGHT
 	else
 		echo "Invalid argument ($VALUE). Please provide a value from 0 to 255!"
 		exit 1
@@ -81,7 +81,7 @@ case $1 in
 	;;
 
 	*)
-		echo "Use: `basename $0` [up|down|total|off|value]"
+		echo "Use: $(basename "$0") [up|down|total|off|value]"
 		exit 1
 	;;
 esac

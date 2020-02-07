@@ -12,7 +12,7 @@ INTERFACE=en1
 DEBUG=sudo
 
 # See how we were called
-case $(basename $0) in
+case $(basename "$0") in
 	qemu-ifup)
 	# Needed for the symlink
 	umask 0022

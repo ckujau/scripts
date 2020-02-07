@@ -63,8 +63,8 @@ for c in $CONFDIR/*.conf; do
 	# backup if the client wants us to.
 	#
 	unset ROOT RLOG NAME HOST PORT OS TAG RDY MSG
-	eval `awk      '/^snapshot_root/ {print "ROOT="$2}; /^logfile/ {print "RLOG="$2}' $c`
-	eval `awk -F\# '/^##HOST=/       {print $3}' "$c"`
+	eval $(awk      '/^snapshot_root/ {print "ROOT="$2}; /^logfile/ {print "RLOG="$2}' "$c")
+	eval $(awk -F\# '/^##HOST=/       {print $3}' "$c")
 
 	# Set NAME to HOST if it wasn't set explicitly in the configuration file
 	[ -z "$NAME" ] && NAME="$HOST"
@@ -94,7 +94,7 @@ for c in $CONFDIR/*.conf; do
 	fi
 
 	# See if the remote system is up & running
-	nc -w1 -z $HOST $PORT > /dev/null
+	nc -w1 -z "$HOST" "$PORT" > /dev/null
 	if [ ! $? = 0 ]; then
 		log "**** Host $NAME not responding on port $PORT, skipping!"
 		continue
@@ -108,22 +108,22 @@ for c in $CONFDIR/*.conf; do
 	case "$OS" in
 		Darwin)
 		# We need TAG=Darwin for this to work!
-		TAG2=$(ssh -4 -p$PORT $HOST "uname -s" 2>/dev/null)
+		TAG2=$(ssh -4 -p"$PORT" "$HOST" "uname -s" 2>/dev/null)
 		;;
 
 		Windows)
 		# We need TAG=Windows for this to work!
-		TAG2="$(ssh -4 -p$PORT $HOST "cygcheck.exe -s" 2>/dev/null | awk '/^Windows/ {print $1}')"
+		TAG2="$(ssh -4 -p"$PORT" "$HOST" "cygcheck.exe -s" 2>/dev/null | awk '/^Windows/ {print $1}')"
 		;;
 
 		BusyBox)
 		# We need TAG=BusyBox for this to work!
-		TAG2="$(ssh -4 -p$PORT $HOST "ls --help" 2>&1 | awk '/BusyBox/ {print $1}')"
+		TAG2="$(ssh -4 -p"$PORT" "$HOST" "ls --help" 2>&1 | awk '/BusyBox/ {print $1}')"
 		;;
 
 		*)
 		# Most Unix/Linux systems have "hostid"
-		TAG2="$(ssh -4 -p$PORT $HOST "hostid" 2>/dev/null)"
+		TAG2="$(ssh -4 -p"$PORT" "$HOST" "hostid" 2>/dev/null)"
 		;;
 	esac
 
@@ -137,8 +137,8 @@ for c in $CONFDIR/*.conf; do
 	if [ -n "$RDY" ]; then
 
 		# See if the remote site wants us to backup
-		TEMP=`$DEBUG mktemp`
-		$DEBUG rsync -4 --port="$PORT" $HOST:"$RDY" "$TEMP" 2>/dev/null
+		TEMP=$($DEBUG mktemp)
+		$DEBUG rsync -4 --port="$PORT" "$HOST":"$RDY" "$TEMP" 2>/dev/null
 		if [ ! $? = 0 ]; then
 			log "**** File \""$NAME":"$RDY"\" ($OS) not found, skipping!"
 			$DEBUG rm -f "$TEMP"
@@ -163,9 +163,9 @@ for c in $CONFDIR/*.conf; do
 	# All tests passed, let's do this now
 	log "**** $NAME/$OS ($INTERVAL) started..." | tee -a "$RLOG"
 	if [ -z "$DEBUG" ]; then
-		rsnapshot -c "$c" $INTERVAL >> "$RLOG" 2>&1
+		rsnapshot -c "$c" "$INTERVAL" >> "$RLOG" 2>&1
 	else
-		echo rsnapshot -c "$c" $INTERVAL
+		echo rsnapshot -c "$c" "$INTERVAL"
 	fi
 
 	# See if we were successful
@@ -206,7 +206,7 @@ PID=$(cat "$PIDFILE" 2>/dev/null)
 if [ -n "$PID" ]; then
 	ps -p"$PID" > /dev/null
 	if [ $? = 0 ]; then
-		log "**** There's another instance of $(basename $0) running (PID: $PID)" 1
+		log "**** There's another instance of $(basename "$0") running (PID: $PID)" 1
 	else
 		echo $$ > "$PIDFILE"
 	fi
@@ -216,7 +216,7 @@ fi
 }
 
 # Be nice to others
-[ -n "$NICE" ] && renice $NICE $$   > /dev/null
+[ -n "$NICE" ] && renice "$NICE" $$   > /dev/null
 [ -n "$IDLE" ] && ionice -c 3 -p $$ > /dev/null
 
 # Main
@@ -224,14 +224,14 @@ case $1 in
 	hourly|daily|weekly|monthly)
 	run_only_once
 	CYCLE="$1"
-	preexec         2>&1 | tee -a $LOG
-	backup "$CYCLE" 2>&1 | tee -a $LOG
-	postexec        2>&1 | tee -a $LOG
+	preexec         2>&1 | tee -a "$LOG"
+	backup "$CYCLE" 2>&1 | tee -a "$LOG"
+	postexec        2>&1 | tee -a "$LOG"
 	;;
 
 	stats)
 	# Not Y3K safe :-)
-	for h in `awk '/^2[0-9][0-9][0-9].*\((hourly|daily|weekly|monthly)\) finished/ {print $5}' "$LOG" | sort -u`; do
+	for h in $(awk '/^2[0-9][0-9][0-9].*\((hourly|daily|weekly|monthly)\) finished/ {print $5}' "$LOG" | sort -u); do
 		MINUTES=$(egrep "${h}.*finished" "$LOG" | awk '{sum+=$9} END {printf "%0.1f\n", sum/NR}')
 		echo "Host $h took an average of $MINUTES minutes to complete."
 	done | sort -nk7
@@ -245,8 +245,8 @@ case $1 in
 	;;
 
 	*)
-	echo "Usage: $(basename $0) [hourly|daily|weekly|monthly]"
-	echo "       $(basename $0) [stats]"
+	echo "Usage: $(basename "$0") [hourly|daily|weekly|monthly]"
+	echo "       $(basename "$0") [stats]"
 	exit 1
 	;;
 esac

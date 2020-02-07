@@ -36,7 +36,7 @@
 #	xargs -0 md5sum | uniq -w32 -D 
 #
 _help() {
-	echo "Usage: `basename $0` [smart|brute] [directories]"
+	echo "Usage: $(basename "$0") [smart|brute] [directories]"
 	exit 1
 }
 
@@ -48,19 +48,19 @@ else
 	DIRS=$@
 fi
 
-TEMP=`mktemp`
+TEMP=$(mktemp)
 trap "rm -f $TEMP $TEMP.fallout $TEMP.fallout.md5 $TEMP.fallout.dup; exit" EXIT INT TERM HUP
 
 case $MODE in
 	smart)
-	BEGIN=`date +%s`
+	BEGIN=$(date +%s)
 	printf "### Gather size & name of all files... "
-	find $DIRS -type f -exec stat -c %s:%n '{}' + > $TEMP
+	find "$DIRS" -type f -exec stat -c %s:%n '{}' + > "$TEMP"
 	cat "$TEMP" | wc -l					# No UUOC here, but we don't want the leading spaces from wc(1)
 	
 	printf "### Gather files of the same size... "
-	cut -d: -f1 $TEMP | sort | uniq -d | while read s; do
-		grep ^"$s" $TEMP
+	cut -d: -f1 "$TEMP" | sort | uniq -d | while read s; do
+		grep ^"$s" "$TEMP"
 	done | sort -u > "$TEMP".fallout			# The "sort -u" at the end is crucial :)
 	cat "$TEMP".fallout | wc -l
 
@@ -77,29 +77,29 @@ case $MODE in
 		grep ^"$d" "$TEMP".fallout.md5
 		echo
 	done | tee "$TEMP".fallout.dup
-	END=`date +%s`
+	END=$(date +%s)
 
 	# Statistics
 	echo
 	echo "           All files: $(cat "$TEMP"             | wc -l)"
 	echo "Files with same size: $(cat "$TEMP".fallout     | wc -l)"
-	echo "     Duplicate files: $(expr `egrep -c '^[[:alnum:]]' "$TEMP".fallout.dup` / 2)"
-	echo "    Time to complete: $(expr $END - $BEGIN) seconds"
+	echo "     Duplicate files: $(expr $(egrep -c '^[[:alnum:]]' "$TEMP".fallout.dup) / 2)"
+	echo "    Time to complete: $(expr "$END" - "$BEGIN") seconds"
 	echo
 	;;
 
 	brute)
-	BEGIN=`date +%s`
-	find $DIRS -type f -exec md5sum '{}' + > "$TEMP"
-	sort -k1 $TEMP | uniq -w32 -D	> "$TEMP".dup		# Print _all_ duplicate lines
+	BEGIN=$(date +%s)
+	find "$DIRS" -type f -exec md5sum '{}' + > "$TEMP"
+	sort -k1 "$TEMP" | uniq -w32 -D	> "$TEMP".dup		# Print _all_ duplicate lines
 
 	echo
 	echo "Duplicate files:" && cat    "$TEMP".dup
-	END=`date +%s`
+	END=$(date +%s)
 	echo
 	echo "           All files: $(cat "$TEMP"             | wc -l)"
-	echo "     Duplicate files: $(expr `egrep -c '^[[:alnum:]]' "$TEMP".dup` / 2)"
-	echo "    Time to complete: $(expr $END - $BEGIN) seconds"
+	echo "     Duplicate files: $(expr $(egrep -c '^[[:alnum:]]' "$TEMP".dup) / 2)"
+	echo "    Time to complete: $(expr "$END" - "$BEGIN") seconds"
 	;;
 
 	*)
