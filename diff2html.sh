@@ -118,7 +118,7 @@ while [ $? -eq 0 ]; do
 done
 IFS=$OIFS
 
-if [ $diffseen -eq 0  &&  $onlyseen -eq 0 ]; then 
+if [ $diffseen -eq 0 ] && [ $onlyseen -eq 0 ]; then 
 	printf '</span>'
 else
 	echo "</div>"
