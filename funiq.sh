@@ -2,7 +2,7 @@
 #
 # (C) David Lambert, 2008-10-01
 # Fuzzy uniq (or Parsing Connect:Direct stats part 3)
-# http://cdunix.blogspot.com/2008/10/fuzzy-uniq-or-parsing-connectdirect.html
+# https://cdunix.blogspot.com/2008/10/fuzzy-uniq-or-parsing-connectdirect.html
 #
 # Get percentage of similarity from command line option, or 85 for default
 #

@@ -2,7 +2,7 @@
 #
 # (C) Mule, 2009-08-07
 # The Lolcats, they are everywhere!
-# http://www.breakingsystemsforfunandprofit.com/the-lolcats-they-are-everywhere/
+# https://web.archive.org/web/20170702162404/http://www.breakingsystemsforfunandprofit.com/the-lolcats-they-are-everywhere/
 #
 DIR=/var/www/ternet
 while read URL; do

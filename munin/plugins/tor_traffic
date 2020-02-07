@@ -3,8 +3,8 @@
 # (c)2010 Christian Kujau <lists@nerdbynature.de>
 # Get accounting information from a running Tor server.
 #
-# More info:
-# https://gitweb.torproject.org/torspec.git/blob/HEAD:/control-spec.txt
+# TC: A Tor control protocol
+# https://gitweb.torproject.org/torspec.git/tree/control-spec.txt
 #
 [ -z "$conf" ] && conf=/etc/torrc
 [ -z "$port" ] && port=9051

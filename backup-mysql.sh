@@ -64,9 +64,14 @@ for db in `mysql --batch --skip-column-names -e 'show databases' | sort`; do
 	case "$db" in
 	performance_schema|information_schema)
 		# Access denied for user 'root'@'localhost' to database 'information_schema' when using LOCK TABLES
-		# http://bugs.mysql.com/bug.php?id=21527 (closed)
-		# http://bugs.mysql.com/bug.php?id=33762 (closed)
-		# http://bugs.mysql.com/bug.php?id=49633
+		# > mysqldump incorrectly tries to LOCK TABLES on the information_schema database.
+		# > https://bugs.mysql.com/bug.php?id=21527 (closed)
+		#
+		# > mysqldump can not dump INFORMATION_SCHEMA
+		# > https://bugs.mysql.com/bug.php?id=33762 (closed)
+		#
+		# > mysqldump: problems dumping INFORMATION_SCHEMA
+		# > https://bugs.mysql.com/bug.php?id=49633 (verified)
 		OPTIONS="--extended-insert --force --flush-logs --flush-privileges --skip-lock-tables --hex-blob --routines --triggers"
 	;;
 

@@ -77,7 +77,7 @@ apg -a 1 -m $LEN -x $LEN -n $NUM
 
 r_gpw() {
 # gpw: Password Generator
-# http://www.multicians.org/thvv/tvvtools.html#gpw
+# https://www.multicians.org/thvv/tvvtools.html#gpw
 #  USAGE: gpw [npasswds] [pwlength<100]
 gpw $NUM $LEN
 }
@@ -86,11 +86,11 @@ r_makepasswd() {
 # There are actually two versions available:
 #
 # The Debian version of makepasswd resides in the "whois" package:
-# > https://bugs.debian.org/116260
 # > whois: Why does it include mkpasswd?
+# > https://bugs.debian.org/116260
 #
-# The Fedora people have their own version:
-# http://people.defora.org/~khorben/projects/makepasswd/
+# > Fedora / mkpasswd
+# > https://koji.fedoraproject.org/koji/packageinfo?packageID=17537
 #
 # makepasswd --chars=$LEN --count=$NUM				# Debian
 makepasswd -l $LEN -n $NUM					# Fedora

@@ -4,7 +4,7 @@
 #
 # Poor wo/man's SSH benchmark. Inspired by:
 # > OpenSSH default/preferred ciphers, hash, etc for SSH2
-# > http://security.stackexchange.com/questions/25662/openssh-default-preferred-ciphers-hash-etc-for-ssh2
+# > https://security.stackexchange.com/a/26074
 #
 # Compare with:
 # > OpenBSD: cipher-speed.sh
@@ -29,7 +29,7 @@ TEMP=$(mktemp)
 trap 'rm -f "$TEMP"; exit' EXIT INT TERM HUP
 
 # Enumerate all known ciphers, MAC and key exchange algorithms.
-# Available since OpenSSH 6.3 / http://www.openssh.com/txt/release-6.3
+# Available since OpenSSH 6.3
 #
 # === Distribution support ================
 # | Debian/wheezy-backports  || OpenSSH 6.6

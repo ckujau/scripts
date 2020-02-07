@@ -2,7 +2,7 @@
 #
 # Convert diff output to colorized HTML.
 # (C) Mitch Frazier, 2008-08-27
-# http://www.linuxjournal.com/content/convert-diff-output-colorized-html
+# https://web.archive.org/web/20190828131321/https://www.linuxjournal.com/content/convert-diff-output-colorized-html
 #
 cat <<XX
 <html>

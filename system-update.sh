@@ -5,7 +5,7 @@
 # Automatic upgrades for various distributions.
 #
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:/opt/local/bin:/opt/csw/bin
- URL=https://raw.github.com/ckujau/scripts/master/system-update.sh
+ URL=https://raw.githubusercontent.com/ckujau/scripts/master/system-update.sh
  LOG=/var/log/system-update.log
 
 umask 0022

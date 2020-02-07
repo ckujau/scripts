@@ -1,7 +1,7 @@
 /*
  * autoconfig.js
  * http://kb.mozillazine.org/Locking_preferences
- * https://developer.mozilla.org/en-US/Firefox/Enterprise_deployment
+ * https://developer.mozilla.org/docs/Mozilla/Firefox/Enterprise_deployment
  *
  * Note: the file specified here will be expected to be located in the
  * installation directory, e.g. /usr/lib/firefox. Instead of putting our

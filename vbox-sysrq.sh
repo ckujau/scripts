@@ -20,10 +20,9 @@
 # https://forums.virtualbox.org/viewtopic.php?f=6&t=10400#p207674
 #
 # Use Magic Sysrq-key in guest
-# http://www.halfdog.net/Misc/TipsAndTricks/VirtualBox.html#MagicSysrq
+# https://www.halfdog.net/Misc/TipsAndTricks/VirtualBox.html#MagicSysrq
 #
 # Switching Linux terminals in VirtualBox using VBoxManage
-# http://blog.frameos.org/2011/06/08/changing-linux-terminals-in-virtualbox-using-vboxmanage/
 # https://web.archive.org/web/20130102094426/http://blog.frameos.org/2011/06/08/changing-linux-terminals-in-virtualbox-using-vboxmanage
 #
 if [ ! $# -eq 2 ]; then
@@ -35,7 +34,7 @@ else
 	SYSRQ="$2"
 fi
 
-# From http://www.mjmwired.net/kernel/Documentation/sysrq.txt
+# https://www.kernel.org/doc/Documentation/admin-guide/sysrq.rst
 PRESS=`echo "
 b|30		# reBoot
 c|2E		# Crash

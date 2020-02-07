@@ -6,19 +6,11 @@
 #
 # TODO: Add more conversions, much more :-)
 #
-# Linkdump:
+# > Convert flac to (almost) anything
+# > https://forums.gentoo.org/viewtopic-t-554188.html
 #
-# Convert flac to (almost) anything
-# https://forums.gentoo.org/viewtopic-t-554188.html
-#
-# .ogg to .mp3
-# https://forums.gentoo.org/viewtopic-t-463068-highlight-.html
-#
-# Howto:convert aac/mp4 to wav/mp3/ogg on Linux
-# http://gimpel.gi.funpic.de/wiki/index.php/Howto:convert_aac/mp4_to_wav/mp3/ogg_on_Linux#ogg2mp3
-#
-# Convert Flac to Mp3
-# https://wiki.archlinux.org/index.php/Convert_Flac_to_Mp3
+# > .ogg to .mp3
+# > https://forums.gentoo.org/viewtopic-t-463068.html
 #
 if [ ! $# -eq 2 ] || [ ! -f "$2" ]; then
 	echo "Usage: `basename $0` [conversion] [file]"
@@ -43,7 +35,8 @@ LAMEARGS="-m j -q 5 --vbr-new -V 4 -s 44.1 --add-id3v2 --ignore-tag-errors"
 
 case $CONVERSION in
 	flac2mp3)
-	# https://wiki.archlinux.org/index.php/Convert_Flac_to_Mp3
+	# Convert FLAC to MP3
+	# https://wiki.archlinux.org/index.php/Convert_FLAC_to_MP3
 	# Software needed: flac, lame
 	OUTPUT=${FILE%.flac}.mp3
 	 TRACK=$(metaflac --show-tag=TRACKNUMBER "$FILE" | sed s/.*=//)
@@ -68,7 +61,6 @@ case $CONVERSION in
 	;;
 
 	m4a2mp3)
-	# http://gimpel.gi.funpic.de/wiki/index.php/Howto:convert_aac/mp4_to_wav/mp3/ogg_on_Linux
 	# Software needed: faad, lame
 	OUTPUT=${FILE%.m4a}.mp3
 	 TRACK=$(faad --info "$FILE" 2>&1 | grep ^track  | sed 's/^.*: //')

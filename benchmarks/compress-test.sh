@@ -4,19 +4,17 @@
 #
 # Compress a file with different programs and see how long it took to do this.
 #
-# Links:
+# > Squash Compression Benchmark
+# > https://quixdb.github.io/squash-benchmark/
 #
-# Squash Compression Benchmark
-# https://quixdb.github.io/squash-benchmark/
+# > Large Text Compression Benchmark
+# > http://mattmahoney.net/dc/text.html
 #
-# Large Text Compression Benchmark
-# http://mattmahoney.net/dc/text.html
+# > Lzturbo library: world's fastest compression library
+# > https://sites.google.com/site/powturbo/home/benchmark
 #
-# Lzturbo library: world's fastest compression library
-# https://sites.google.com/site/powturbo/home/benchmark
-#
-# Packbench
-# https://martin-steigerwald.de/computer/programme/packbench/
+# > Packbench
+# > https://martin-steigerwald.de/computer/programme/packbench/
 #
 PATH=/usr/local/bin:/usr/bin:/bin
 PROGRAMS=${PROGRAMS:-gzip pigz bzip2 pbzip2 lbzip2 xz pxz lz4 lzma lzip brotli zstd pzstd pixz}

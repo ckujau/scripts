@@ -4,8 +4,11 @@
 # Start/stop an IPsec tunnel with iproute2
 #
 # Inspired by:
-# https://gist.github.com/vishvananda/7094676
-# https://backreference.org/2014/11/12/on-the-fly-ipsec-vpn-with-iproute2/
+# > vishvananda/tunnel.sh
+# > https://gist.github.com/vishvananda/7094676
+#
+# > “On the fly” IPsec VPN with iproute2
+# > https://backreference.org/2014/11/12/on-the-fly-ipsec-vpn-with-iproute2/
 #
 if [ $# -ne 7 ] || [ ! -f "$HOME/.xfrm-keys" ]; then
 	echo "Usage: $(basename $0) [SRC LOCAL DEV] [DST REMOTE DEV] [start|stop|status]"

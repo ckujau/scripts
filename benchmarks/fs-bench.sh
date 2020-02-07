@@ -13,11 +13,11 @@
 # TODO:
 # - different mount options for each filesystems
 # - different benchmark options
-# - integrate fio? (http://git.kernel.dk/?p=fio.git)
+# - integrate fio? (https://github.com/axboe/fio)
 #
 # v0.1 - initial version
 # v0.2 - disabled 2 filesystems
-#        ufs - http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=526586
+#        ufs - https://bugs.debian.org/526586 ("mkfs.ufs: could not find special device")
 #        nilfs2 - filesystem fills up until ENOSPC
 # v0.3 - run tiobench with only 1 thread, otherwise we get:
 #        Illegal division by zero at /usr/bin/tiobench line 163
@@ -229,7 +229,7 @@ $DEBUG egrep -hv '^format' $LOG/raw/bonnie-*.csv | bon_csv2html > $LOG/bonnie.ht
 ########################################################
 run_stress() {
 #
-# Based on http://oss.oracle.com/~mason/stress.sh
+# Based on https://oss.oracle.com/~mason/stress.sh
 #      Copyright (C) 1999 Bibliotech Ltd., 631-633 Fulham Rd., London SW6 5UQ.
 #      $Id: stress.sh,v 1.2 1999/02/10 10:58:04 rich Exp $
 #

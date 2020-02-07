@@ -36,11 +36,11 @@ echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>
 $name<br/>
 $city</p>
 <p>Die Postaddresse kann via <a href=\"mailto:$mail@$host\">Email</a> erfragt werden oder via <a href=
-\"http://www.denic.de/de/hintergrund/whois-service/webwhois.html\">whois</a> fuer die Domain <a href=\"http://$host\">$host</a> abgefragt
+\"https://www.denic.de/service/whois-service/\">whois</a> fuer die Domain <a href=\"http://$host\">$host</a> abgefragt
 werden.<br /></p>
 <p>E-Mail: $mail@$host<br />
 WWW: http://$host/<br /></p>
-<p>Inhaltlich Verantwortlicher gemaess <a href=\"http://www.gesetze-im-internet.de/tmg/\">Telemediengesetz</a>: $name (Anschrift wie oben)<br /></p>
+<p>Inhaltlich Verantwortlicher gemaess <a href=\"https://www.gesetze-im-internet.de/tmg/\">Telemediengesetz</a>: $name (Anschrift wie oben)<br /></p>
 <p>Hinweise:</p>
 <ol>
 <li>Trotz sorgfaeltiger inhaltlicher Kontrolle uebernehme ich keine Haftung fuer die Inhalte externer Links. Fuer den Inhalt der

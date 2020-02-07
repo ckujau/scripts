@@ -145,8 +145,13 @@ case ${OS} in
 	# NOTE: If the designated EA is not set, getfattr may not return a non-zero
 	# exit code. This has been fixed upstream but may not have been picked up
 	# by your distribution.
-	# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=520659
-	# https://bugzilla.redhat.com/show_bug.cgi?id=660619
+	#
+	# > getfattr should indicate missing xattrs via exit value
+	# > https://bugs.debian.org/520659
+	#
+	# > getfattr does not return failure when designated attribute does not exist
+	# > https://bugzilla.redhat.com/show_bug.cgi?id=660619
+	#
 	getfattr --only-values --name user.checksum.${DIGEST} -- "$1" 2>/dev/null | awk '/[a-z0-9]/ {print $1}'
 	;;
 

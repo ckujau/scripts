@@ -3,8 +3,8 @@
 # (c)2010 Christian Kujau <lists@nerdbynature.de>
 #
 # Execute a few security checks, keep state across runs.
-#   rkhunter: http://www.rootkit.nl/projects/rootkit_hunter.html
-#      lynis: http://www.rootkit.nl/projects/lynis.html
+#   rkhunter: http://rkhunter.sourceforge.net/
+#      lynis: https://cisofy.com/lynis/
 # chkrootkit: http://www.chkrootkit.org/
 #
 STATE=/var/run/sec.state

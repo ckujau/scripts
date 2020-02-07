@@ -1,9 +1,10 @@
 #!/bin/sh
 #
-# (c)2017-2019 Christian Kujau <lists@nerdbynature.de>
+# (c)2017 Christian Kujau <lists@nerdbynature.de>
 #
-# https://www.virtualbox.org/manual/ch06.html#nichardware
 # 6.1. Virtual networking hardware
+# https://www.virtualbox.org/manual/ch06.html#nichardware
+#
 # > vboxmanage --help | grep -A2 nictype
 #  --nictype1   Am79C970A	- pcnet  II
 #               Am79C973	- pcnet III	- default

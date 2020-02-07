@@ -2,7 +2,7 @@
 #
 # (C) MMCM
 # External proxy for transparent proxying
-# https://forum.openwrt.org/viewtopic.php?id=18582
+# https://forum.archive.openwrt.org/viewtopic.php?id=18582
 #
 SRC=10.0.0.0/24
 IFACE=br-lan

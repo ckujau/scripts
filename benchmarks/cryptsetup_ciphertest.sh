@@ -1,12 +1,13 @@
 #!/bin/sh
 #
 # (c)2013 Christian Kujau <lists@nerdbynature.de>
+#
 # Create dm-crypt devices with different combinations of ciphers, modes, hash
 # alorithms and key sizes.
 #
 # Preferably cryptsetup(8) would be able to parse /proc/crypto and generate a
 # list of possible combinations, but this has not been implemented.
-# See https://code.google.com/p/cryptsetup/issues/detail?id=20 for that. Instead,
+# See https://gitlab.com/cryptsetup/cryptsetup/issues/20 for that. Instead,
 # we iterate through a list of more or less "common" choices and print out all
 # valid (and invalid) combinations. The results can later be used by
 # cryptsetup_benchmark.sh - so we don't benchmark invalid combinations.
