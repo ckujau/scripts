@@ -16,9 +16,6 @@
 # Keyboard scancodes: Ordinary scancodes
 # https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html#ss1.4
 #
-# Re: Magic sysrq on Linux guest, under a Linux host
-# https://forums.virtualbox.org/viewtopic.php?f=6&t=10400#p207674
-#
 # Use Magic Sysrq-key in guest
 # https://www.halfdog.net/Misc/TipsAndTricks/VirtualBox.html#MagicSysrq
 #
@@ -64,8 +61,8 @@ if [ -n "$PRESS" ]; then
 	VBoxManage controlvm "$VM" keyboardputscancode 1d 38 54 "$PRESS" "$RELEASE" d4 b8 9d
 else
 	echo
-	echo "Unknown sysrq key! ("${SYSRQ}")"
-	egrep '^.\|' "$0"
+	echo "Unknown sysrq key! (${SYSRQ})"
+	grep -E '^.\|' "$0"
 	echo
 	exit 1
 fi

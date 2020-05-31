@@ -13,7 +13,11 @@
 #	   systems, as older shells may not understand command substitution
 #	   with parentheses, as required by POSIX.
 #  NetBSD: cksum & {g,s}etextattr, should be included in src.
-# OpenBSD: No extended attribute support since July 2005 (commit 9dd8235)
+# OpenBSD: No extended attribute support since July 2005:
+#	   > https://github.com/openbsd/src/commit/9dd8235"
+#	   > Extended Attributes was a piece to get to ACLs, however ACLs have
+#	   > not been worked on, so EA is pointless. Also the code is not enabled
+#	   > in GENERIC so it is not being tested or maintained.
 #
 # Each operating system has its own routines for setting/getting EAs and also
 # for calculating checksums. The only hardcoded value is the digest algorithm
@@ -26,22 +30,25 @@
 # - Or rewrite this whole thing in Python, for portability's sake? (hashlib, os/xattr)
 #
 DIGEST="md5"			# md5, sha1, sha256, sha512
+  PROG=$(basename "$0")
 
 # Adjust if needed
 PATH=/bin:/usr/bin:/sbin:/usr/local/bin:/opt/local/bin:/opt/csw/bin:/usr/sfw/bin
 
 print_usage()
 {
-	echo "Usage: $(basename "$0") [get]       [file]"
-	echo "       $(basename "$0") [set]       [file]"
-	echo "       $(basename "$0") [get-set]   [file]"
-	echo "       $(basename "$0") [check-set] [file]"
-	echo "       $(basename "$0") [check]     [file]"
-	echo "       $(basename "$0") [remove]    [file]"
-	echo "       $(basename "$0") [test]"
-	echo ""
-	echo "   get-set - sets a new checksum if none is found, print checksum otherwise."
-	echo " check-set - sets a new checksum if none is found, verify checksum otherwise."
+cat <<EOF
+ Usage:	${PROG} [get]       [file]
+	${PROG} [set]       [file]
+	${PROG} [get-set]   [file]
+	${PROG} [check-set] [file]
+	${PROG} [check]     [file]
+	${PROG} [remove]    [file]
+	${PROG} [test]
+
+	  get-set - sets a new checksum if none is found, print checksum otherwise.
+	check-set - sets a new checksum if none is found, verify checksum otherwise.
+EOF
 }
 
 if [ $# -ne 2 ] || [ ! -f "$2" ] && [ ! "$1" = "test" ]; then
@@ -104,15 +111,15 @@ case ${OS} in
 	${DIGEST} -q "$1"
 	;;
 
-	NetBSD)
-	# cksum should support all common algorithms.
-	cksum -q -a ${DIGEST} "$1"
-	;;
-
 	Linux)
 	# GNU/coreutils should be installed on most Linux distributions.
 	# It's also by far much faster than its perl or openssl alternatives.
 	${DIGEST}sum "$1" | awk '{print $1}'
+	;;
+
+	NetBSD)
+	# cksum should support all common algorithms.
+	cksum -q -a ${DIGEST} "$1"
 	;;
 
 	SunOS)
@@ -121,7 +128,7 @@ case ${OS} in
 	;;
 
 	*)
-	do_log "We don't support ${OS}, yet :-(" 1
+	do_log "We don't support ${OS} :-(" 1
 	;;
 esac
 }
@@ -135,10 +142,6 @@ case ${OS} in
 
 	FreeBSD)
 	pxattr -n user.checksum.${DIGEST} "$1" 2>/dev/null | awk '/user.checksum/ {print $NF}'
-	;;
-
-	NetBSD)
-	getextattr -q user checksum.${DIGEST} "$1"
 	;;
 
 	Linux)
@@ -155,12 +158,16 @@ case ${OS} in
 	getfattr --only-values --name user.checksum.${DIGEST} -- "$1" 2>/dev/null | awk '/[a-z0-9]/ {print $1}'
 	;;
 
+	NetBSD)
+	getextattr -q user checksum.${DIGEST} "$1"
+	;;
+
 	SunOS)
 	runat "$1" cat user.checksum.${DIGEST} 2>/dev/null
 	;;
 
 	*)
-	do_log "We don't support ${OS}, yet :-(" 1
+	do_log "We don't support ${OS} :-(" 1
 	;;
 esac
 }
@@ -179,12 +186,12 @@ case ${OS} in
 	pxattr -n user.checksum.${DIGEST} -v "${CHECKSUM_C}" "$1"
 	;;
 
-	NetBSD)
-	setextattr user checksum.${DIGEST} "${CHECKSUM_C}" "$1"
-	;;
-
 	Linux)
 	setfattr --name user.checksum.${DIGEST} --value "${CHECKSUM_C}" -- "$1"
+	;;
+
+	NetBSD)
+	setextattr user checksum.${DIGEST} "${CHECKSUM_C}" "$1"
 	;;
 
 	SunOS)
@@ -192,7 +199,7 @@ case ${OS} in
 	;;
 
 	*)
-	do_log "We don't support ${OS}, yet :-(" 1
+	do_log "We don't support ${OS} :-(" 1
 	;;
 esac
 }
@@ -290,7 +297,7 @@ case ${ACTION} in
 		;;
 
 		*)
-		do_log "We don't support ${OS}, yet :-(" 1
+		do_log "We don't support ${OS} :-(" 1
 		;;
 	esac
 	;;
