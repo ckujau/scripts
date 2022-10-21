@@ -83,7 +83,7 @@ case $MODE in
 	echo
 	echo "           All files: $(cat "$TEMP"             | wc -l)"
 	echo "Files with same size: $(cat "$TEMP".fallout     | wc -l)"
-	echo "     Duplicate files: $(expr $(egrep -c '^[[:alnum:]]' "$TEMP".fallout.dup) / 2)"
+	echo "     Duplicate files: $(expr $(grep -Ec '^[[:alnum:]]' "$TEMP".fallout.dup) / 2)"
 	echo "    Time to complete: $(expr "$END" - "$BEGIN") seconds"
 	echo
 	;;
@@ -98,7 +98,7 @@ case $MODE in
 	END=$(date +%s)
 	echo
 	echo "           All files: $(cat "$TEMP"             | wc -l)"
-	echo "     Duplicate files: $(expr $(egrep -c '^[[:alnum:]]' "$TEMP".dup) / 2)"
+	echo "     Duplicate files: $(expr $(grep -Ec '^[[:alnum:]]' "$TEMP".dup) / 2)"
 	echo "    Time to complete: $(expr "$END" - "$BEGIN") seconds"
 	;;
 

@@ -9,14 +9,14 @@ BASE=/sys/devices/temperatures
 
 case $1 in
 	-s|--short)
-	echo "CPU: $(cat $BASE/sensor1_temperature) ($(awk '/^clock/ {print $3}' /proc/cpuinfo \
+	echo "CPU: $(cat ${BASE}/sensor1_temperature) ($(awk '/^clock/ {print $3}' /proc/cpuinfo \
 			| sed 's/\.[0-9]*//')) Fan: $(sed 's/.*(//;s/ rpm)$//' \
-			< $BASE/sensor1_fan_speed) GPU: $(cat $BASE/sensor2_temperature)"
+			< ${BASE}/sensor1_fan_speed) GPU: $(cat ${BASE}/sensor2_temperature)"
 	;;
 
 	-b)
 	# If pmu_battery is present
-	find /sys/ -type f | grep batte | egrep -v 'uevent|srcversion|initstate|refcnt|sections/\.|autosuspend_delay_ms|note.gnu.build' | \
+	find /sys/ -type f | grep battery | grep -Ev 'uevent|srcversion|initstate|refcnt|sections/\.|autosuspend_delay_ms|note.gnu.build' | \
 		xargs grep . | sed 's/.*pmu-battery.[0-9]\///;s/:/		/'
 	;;
 
@@ -28,13 +28,13 @@ case $1 in
 	;;
 
 	*)
-	for p in $BASE/sensor1_location \
-		 $BASE/sensor1_fan_speed \
-		 $BASE/sensor1_temperature \
-		 $BASE/sensor1_limit \
-		 $BASE/sensor2_location \
-		 $BASE/sensor2_temperature \
-		 $BASE/sensor2_limit; do
+	for p in ${BASE}/sensor1_location \
+		 ${BASE}/sensor1_fan_speed \
+		 ${BASE}/sensor1_temperature \
+		 ${BASE}/sensor1_limit \
+		 ${BASE}/sensor2_location \
+		 ${BASE}/sensor2_temperature \
+		 ${BASE}/sensor2_limit; do
 		echo "$(basename $p)	$(cat $p)"
 	done
 	# As a bonus, print our current clockspeed

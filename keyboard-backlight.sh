@@ -26,11 +26,11 @@
 # variable as you want it.
 #
 
- BACKLIGHT="/sys/class/leds/smc::kbd_backlight/brightness"
-BRIGHTNESS=$(cat $BACKLIGHT)
+ BACKLIGHT="/sys/class/leds/smc::kbd_backlight/brightness"		# TBD
+BRIGHTNESS=$(cat ${BACKLIGHT})
  INCREMENT=20
 
-if [ $(id -ru) -ne 0 ]; then
+if [ "$(id -ru)" -ne 0 ]; then
 	echo "Please run this program as superuser!"
 	exit 1
 fi
@@ -43,37 +43,37 @@ exit 1
 case $1 in
 	up)
 	# BRIGHTNESS will be capped at 255 anyway
-	if [ "$BRIGHTNESS" -lt 255 ]; then
-		expr "$BRIGHTNESS" + $INCREMENT > $BACKLIGHT
+	if [ "${BRIGHTNESS}" -lt 255 ]; then
+		echo $(( BRIGHTNESS + INCREMENT )) > ${BACKLIGHT}
 	else
-		die "$BRIGHTNESS"
+		die "${BRIGHTNESS}"
 	fi
 	;;
 
 	down)
-	if [ "$BRIGHTNESS" -gt 0 ]; then
-		VALUE=$(expr "$BRIGHTNESS" - $INCREMENT)
+	if [ "${BRIGHTNESS}" -gt 0 ]; then
+		VALUE=$(( BRIGHTNESS - INCREMENT ))
 
 		# BRIGHTNESS cannot be negative
 		[ "$VALUE" -lt 0 ] && VALUE=0
-		echo $VALUE > $BACKLIGHT
+		echo $VALUE > ${BACKLIGHT}
 	else
-		die "$BRIGHTNESS"
+		die "${BRIGHTNESS}"
 	fi
 	;;
 
 	total)
-	echo 255 > $BACKLIGHT
+	echo 255 > ${BACKLIGHT}
 	;;
 
 	off)
-	echo 0 > $BACKLIGHT
+	echo 0 > ${BACKLIGHT}
 	;;
 
-	[\-0-9]*)
+	[0-9]*)
 	VALUE=$1
 	if [ "$VALUE" -ge 0 ] && [ "$VALUE" -le 255 ]; then
-		echo "$VALUE" > $BACKLIGHT
+		echo "$VALUE" > ${BACKLIGHT}
 	else
 		echo "Invalid argument ($VALUE). Please provide a value from 0 to 255!"
 		exit 1
@@ -86,4 +86,4 @@ case $1 in
 	;;
 esac
 
-echo "Brightness set to $(cat $BACKLIGHT)"
+echo "Brightness set to $(cat ${BACKLIGHT})"

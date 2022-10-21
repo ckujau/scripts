@@ -55,10 +55,10 @@ w|11		# show-blocked-tasks
 z|2C		# dump-ftrace-buffer
 " | grep -E "^${SYSRQ}" | cut -c3,4)
 
-if [ -n "$PRESS" ]; then
-	RELEASE=$(printf "%X\n" $((0x$PRESS + 0x80)))	# or: 'obase=16; ibase=16; $PRESS + 80 | bc'
+if [ -n "${PRESS}" ]; then
+	RELEASE=$(printf "%X\n" $((0x${PRESS} + 0x80)))	# or: 'obase=16; ibase=16; $PRESS + 80 | bc'
 	set -x
-	VBoxManage controlvm "$VM" keyboardputscancode 1d 38 54 "$PRESS" "$RELEASE" d4 b8 9d
+	VBoxManage controlvm "$VM" keyboardputscancode 1d 38 54 "${PRESS}" "${RELEASE}" d4 b8 9d
 else
 	echo
 	echo "Unknown sysrq key! (${SYSRQ})"

@@ -4,7 +4,7 @@
 # MacPorts cleanup
 #
 PATH=/bin:/usr/bin:/opt/local/bin
-LAST="$HOME"/.ports.clean
+LAST="${HOME}/.ports.clean"
 umask 0022
 
 case $1 in
@@ -20,16 +20,16 @@ case $1 in
 	port selfupdate
 	port echo outdated 
 	port upgrade -u outdated
-	if [ -f "$LAST" ]; then
-		A=$(stat -f %m "$LAST")
+	if [ -f "${LAST}" ]; then
+		A=$(stat -f %m "${LAST}")
 		B=$(date +%s)
 		# Cleanup every 1209600 seconds (14 days)
-		if [ $(echo "$B" - "$A" | bc) -gt 1209600 ]; then
+		if [ $(( B - A )) -gt 1209600 ]; then
 			echo "port clean all..."
 			echo nice -n20 port clean -f --all all > /dev/null
 		fi
 	else
-		touch "$LAST"
+		touch "${LAST}"
 	fi
 	;;
 

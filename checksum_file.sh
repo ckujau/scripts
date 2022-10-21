@@ -208,7 +208,7 @@ esac
 case ${ACTION} in
 ####### GET
 	get)
-	CHECKSUM_S=$(_get "$FILE")
+	CHECKSUM_S=$(_get "${FILE}")
 	
 	# Did we find a checksum?
 	if [ -n "${CHECKSUM_S}" ]; then
@@ -221,13 +221,13 @@ case ${ACTION} in
 
 ####### SET
 	set)
-	_set "$FILE" || \
+	_set "${FILE}" || \
 		do_log "ERROR: failed to set user.checksum.${DIGEST} for file ${FILE}!" 1
 	;;
 
 ####### GET-SET)
 	get-set)
-	CHECKSUM_S=$(_get "$FILE")
+	CHECKSUM_S=$(_get "${FILE}")
 	
 	# Did we find a checksum?
 	if [ -n "${CHECKSUM_S}" ]; then
@@ -235,28 +235,28 @@ case ${ACTION} in
 		echo "user.checksum.${DIGEST}: ${CHECKSUM_S}"
 	else
 		# Set checksum
-		_set "$FILE"
+		_set "${FILE}"
 	fi
 	;;
 		
 ####### CHECK-SET
 	check-set)
-	CHECKSUM_S=$(_get "$FILE")
+	CHECKSUM_S=$(_get "${FILE}")
 	
 	# Did we find a checksum?
 	if [ -n "${CHECKSUM_S}" ]; then
 		# Verify checksum
-		$0 check "$FILE"				# Calling ourselves!
+		$0 check "${FILE}"				# Calling ourselves!
 	else
 		# Set checksum
-		_set "$FILE"
+		_set "${FILE}"
 	fi
 	;;
 
 ####### CHECK
 	check)
-	CHECKSUM_C=$(_calc "$FILE")
-	CHECKSUM_S=$(_get  "$FILE")
+	CHECKSUM_C=$(_calc "${FILE}")
+	CHECKSUM_S=$(_get  "${FILE}")
 
 	# Bail out if there is no checksum to compare
 	[ -z  "${CHECKSUM_C}" ] || [ -z "${CHECKSUM_S}" ] && \
@@ -277,23 +277,23 @@ case ${ACTION} in
 	echo "Removing user.checksum.${DIGEST} from ${FILE}..."
 	case ${OS} in
 		Darwin)
-		xattr -d user.checksum.${DIGEST} "$FILE"
+		xattr -d user.checksum.${DIGEST} "${FILE}"
 		;;
 
 		FreeBSD)
-		pxattr -x user.checksum.${DIGEST} "$FILE"
+		pxattr -x user.checksum.${DIGEST} "${FILE}"
 		;;
 
 		NetBSD)
-		rmextattr user checksum.${DIGEST} "$FILE"
+		rmextattr user checksum.${DIGEST} "${FILE}"
 		;;
 
 		Linux)
-		setfattr --remove user.checksum.${DIGEST} -- "$FILE"
+		setfattr --remove user.checksum.${DIGEST} -- "${FILE}"
 		;;
 
 		SunOS)
-		runat "$FILE" rm user.checksum.${DIGEST}
+		runat "${FILE}" rm user.checksum.${DIGEST}
 		;;
 
 		*)
@@ -306,9 +306,9 @@ case ${ACTION} in
 	test)
 	# We need a temporary file, even on macOS
 	TEMP=$(mktemp -p . 2>/dev/null || mktemp ./tmp.XXXXXXX 2>/dev/null)
-	trap "rm -f $TEMP" EXIT INT TERM HUP
+	trap "rm -f ${TEMP}" EXIT INT TERM HUP
 
-	if [ ! -f "$TEMP" ]; then
+	if [ ! -f "${TEMP}" ]; then
 		do_log "Failed to create temporary file ${TEMP}!" 1
 	else
 		date > "${TEMP}"
