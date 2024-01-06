@@ -13,8 +13,8 @@ if [ "$1" = "autoconf" ]; then
 	exit 0
 fi
 
-if [ ! -f "$CACHE" ]; then
-	echo "Cache $CACHE not found!"
+if [ ! -f "${CACHE}" ]; then
+	echo "Cache ${CACHE} not found!"
 	exit 1
 fi
 
@@ -29,14 +29,13 @@ if [ "$1" = "config" ]; then
 
 	# Munin doesn't like slashes, dots, hyphens and pretty much any symbols in
 	# its variables.
-	awk -F\	 '!/lost\+found/ {print $2}' $CACHE | sort | while read u; do
-		u2=`echo "$u" | sed 's/[[:punct:]]/_/g;s/ /_/g'`
-		echo "$u2".label $u
-#		echo "$u2".warning 0
-#		echo "$u2".critical 0
+	awk -F\	 '!/lost\+found/ {print $2}' "${CACHE}" | sort | while read -r u; do
+		u2=$(echo "${u}" | sed 's/[[:punct:]]/_/g;s/ /_/g')
+		echo "${u2}".label "${u}"
+#		echo "${u2}".warning 0
+#		echo "${u2}".critical 0
 	done
 	exit 0
 fi	
 
-awk '!/lost\+found/ {gsub(/\//,"_"); print $2".value "$1 * 1024 }' $CACHE | sort -r -n -k2
-# awk -F\	 '!/lost+found/ {print $2".value "$1 * 1024 }' $CACHE | sed 's/[[:punct:]]/_/g' | sort -r -n -k2
+awk '!/lost\+found/ {gsub(/\//,"_"); print $2".value "$1 * 1024 }' "${CACHE}" | sort -r -n -k2
